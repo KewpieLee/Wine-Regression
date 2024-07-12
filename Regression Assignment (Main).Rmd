@@ -68,8 +68,17 @@ Data source: [Wine Quality Dataset](https://www.semanticscholar.org/paper/Modeli
 #To display the structure of chosen dataset.
 str(Dataset)
 
+<<<<<<< HEAD
 #To display descriptive statistics of chosen dataset.
 round(stat.desc(Dataset),2)
+=======
+ggplot(Dataset, aes(x = quality)) + 
+  geom_bar() + 
+  xlab("Wine Quality") + 
+  ylab("Frequency") + 
+  ggtitle("Distribution of Wine Quality")
+
+>>>>>>> 31f569634892c2d5d5ffd2fda5eaef2f58a3819e
 ```
 
 **FITTING THE FULL MODEL**
@@ -154,5 +163,3 @@ glm_updated_full = glm(quality ~., data= updated_fullmodel)
 glm_updated_full
 
 ```
-
-
