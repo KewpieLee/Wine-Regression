@@ -1,34 +1,144 @@
 ---
-title: "Regression Assignment Main"
+title: "Regression Assignment (dduyi)"
+author: "Darren Yap Yee Shern"
+date: "`r Sys.Date()`"
 output: html_document
-date: "2024-07-12"
 ---
-<<<<<<< HEAD
-#HDCHDChjjhjhjh
-#huhguhu
-=======
-#Aliah
->>>>>>> c51cc5ff9a10779821ec1c559b18d44346641ae2
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-#alskdjlasdjlkfjaks asdjfkalsdf
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+**INTRODUCTION**
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Wine quality assessment is an important factor in the wine industry and the ability to predict the quality based on various chemical properties can enhance decision making processes in viticulture. In fact, chemical analysis of wine has been a well-established method for determining its quality; factors its acidity, sugar content and alcohol levels has been known to affect taste and overall consumer satisfaction.
 
-```{r cars}
-summary(cars)
-```
+#### DATA PROCESSING
 
-## Including Plots
+```{r}
 
-You can also embed plots, for example:
+library(dplyr)
+library(MASS)
+library(ggplot2)
+library(tidyverse)
+library(olsrr)
+library(AICcmodavg)
+library(leaps)
+library(corrplot)
+library(car)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+
+Dataset<-read.csv("C:/Users/Darren/OneDrive - Sunway Education Group/UNI Y3/Regression/Assignment/dataset.csv", sep =";")
+glimpse(Dataset)
+```
+
+#### Dataset Description: Name
+
+The dataset provided is considered for *vinho verde*, a unique product from Minho from the northwest region in Portugal and was collected from May (2004) to February (2007). Note that both red and white wine datasets were available, but the white wine dataset was chosen for analysis and the red wine dataset was used to validate and verify results
+
+Variables Involved under considered dataset:
+
+1.  Sulphates (g(potassium sulphate)/dm^3^)
+2.  Chlorides (g(sodium chloride)/dm^3^)
+3.  Volatile acidity (g(acetic acid)/dm^3^)
+4.  Fixed acidity (g(tartaric acid)/dm^3^)
+5.  Total sulfur dioxide (mg/dm^3^)
+6.  Free sulfur dioxide (mg/dm^3^)
+7.  Residual sugar (g/dm^3^)
+8.  Citric acid (g/dm^3^)
+9.  Density (g/cm^3^)
+10. Alcohol (vol.%)
+11. pH level
+12. Quality
+
+This Dataset consists of 4898 observations based on 12 variables
+
+Data source: [Wine Quality Dataset](https://www.semanticscholar.org/paper/Modeling-wine-preferences-by-data-mining-from-Cortez-Cerdeira/bf15a0ccc14ac1deb5cea570c870389c16be019c)
+
+**FINDING DESCRIPTIVE STATISTICS**
+
+```{r}
+
+summary(Dataset)
+#interpret important parts, average min and max, as long as can provide information
+# do histogram, see that trend increase or smtg. 
+
+#not sure about this part
+
+```
+
+**FITTING THE FULL MODEL**
+
+```{r}
+
+# Full model fitting
+
+fullmodel<-lm(quality~.,data=Dataset)
+summary(fullmodel)
+
+# Initial preliminary values
+
+fullmodel_aic <- AIC(fullmodel)
+fullmodel_bic <- BIC(fullmodel)
+
+fullmodel_aic
+fullmodel_bic
+
+```
+
+#### **INTERPRETATION**
+
+1)  Residual inspection : Residuals of the full model do appear to be symmetrically distributed around 0, which is ideal
+
+2)  Coefficient inspection : by looking at the associated p-values for the t-test, we can identify whether the coefficient is significantly different zero. In this context, 3 variables stand out with having a p-value \>0.05, that being Citric Acid, Chlorides and Total Sulfur Dioxide.
+
+3)  Residual standard error: value should be as minimal as possible to indicate a better model fitted; under the full model it is 0.7514
+
+4)  Multiple R-squared: value should be as high as possible to indicate how well the model performs in explaining variability of the data observations; under the full model it is 0.2819
+
+**INVESTIGATING INFLUENCE**
+
+```{r}
+
+#studentized residuals ( >3 may be potential outlier)
+
+studentized_residuals_fullmodel<-studres(fullmodel)
+plot(studentized_residuals_fullmodel)
+residual_threshold=3
+
+# cooks distance (points>1 considered influential)
+
+cd_fullmodel<-cooks.distance(fullmodel)
+plot(cd_fullmodel, main="Cook's distance visualization", ylab="cooks distance")
+abline(h = 4/(nrow(Dataset)-length(coef(fullmodel))), col = "red")
+cd_threshold=4/nrow(Dataset)
+
+
+# hat values, to investigate leverage
+
+hatvalues_fullmodel<-hatvalues(fullmodel)
+plot(hatvalues_fullmodel)
+abline(h= 2 * (length(fullmodel$coefficients)) / nrow(Dataset),col ="red")
+leverage_threshold=2*(length(fullmodel$coefficients)) / nrow(Dataset)
+
+#DFFITS values
+
+dffits_fullmodel<-dffits(fullmodel)
+plot(dffits_fullmodel)
+abline(h= 2 * sqrt((length(fullmodel$coefficients)) / nrow(Dataset)),col="red")
+dffits_threshold=2*(sqrt((length(fullmodel$coefficients))) / nrow(Dataset))
+
+
+#all flagged points that need to be removed
+
+high_studentized_residual_points<-which(studentized_residuals_fullmodel>residual_threshold)
+high_leverage_points<-which(hatvalues_fullmodel>leverage_threshold)
+high_dffits_points<-which(abs(dffits_fullmodel)>dffits_threshold)
+high_cooks_distance_points<-which(cd_fullmodel>cd_threshold)
+
+all_potential_issues=union(high_studentized_residual_points,high_leverage_points,high_dffits_points,high_cooks_distance_points)
+
+updated_fullmodel<-Dataset[-all_potential_issues, ]
+
+
+
+```
