@@ -70,6 +70,12 @@ round(stat.desc(Dataset),2)
 
 str(Dataset)
 
+ggplot(Dataset, aes(x = quality)) + 
+  geom_bar() + 
+  xlab("Wine Quality") + 
+  ylab("Frequency") + 
+  ggtitle("Distribution of Wine Quality")
+
 ```
 
 **FITTING THE FULL MODEL**
@@ -154,5 +160,3 @@ glm_updated_full = glm(quality ~., data= updated_fullmodel)
 glm_updated_full
 
 ```
-
-
