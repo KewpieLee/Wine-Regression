@@ -1,9 +1,15 @@
 ---
-title: "Regression Assignment (dduyi)"
+title: "MAT3024 Regression Analysis Assignment"
 author: "Darren Yap Yee Shern"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  rmdformats::readthedown
 ---
+## Group 1
+
+Darren Yap Yee Shern (21001235) <br> Nur' Aliah Syamimi Binti Muhammad Sazali (21081765)<br> Chong Kai Yuan (21081609) <br> Ethan Lee Jia Hua (21089750) <br> Daniel Chin Wei Jian (20095204) <br> Harreesh Dev Chandrasager (20083200)
+
+<br>
 
 **INTRODUCTION**
 
@@ -11,7 +17,7 @@ Wine quality assessment is an important factor in the wine industry and the abil
 
 #### DATA PROCESSING
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 library(dplyr)
 library(MASS)
@@ -23,6 +29,7 @@ library(leaps)
 library(corrplot)
 library(car)
 library(pastecs)
+library(rmdformats)
 
 ```
 
@@ -58,18 +65,11 @@ Data source: [Wine Quality Dataset](https://www.semanticscholar.org/paper/Modeli
 **FINDING DESCRIPTIVE STATISTICS**
 
 ```{r}
-
-summary(Dataset)
-#interpret important parts, average min and max, as long as can provide information
-# do histogram, see that trend increase or smtg. 
-
-#not sure about this part
-
-round(stat.desc(Dataset),2)
-#another way to summarize the data set
-
+#To display the structure of chosen dataset.
 str(Dataset)
 
+#To display descriptive statistics of chosen dataset.
+round(stat.desc(Dataset),2)
 ```
 
 **FITTING THE FULL MODEL**
