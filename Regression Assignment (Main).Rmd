@@ -117,7 +117,6 @@ fullmodel_bic
 ## Investigating Influence
 
 ```{r}
-
 #studentized residuals ( >3 may be potential outlier)
 
 studentized_residuals_fullmodel<-studres(fullmodel)
@@ -150,8 +149,8 @@ high_cooks_distance_points<-which(cd_fullmodel>cd_threshold)
 
 all_potential_issues=unique(c(high_studentized_residual_points,high_leverage_points,high_cooks_distance_points))
 
-updated_fullmodel<-Dataset[-all_potential_issues, ]
-
+updated_Dataset<-Dataset[-all_potential_issues, ]
+updated_fullmodel <- lm(quality ~ ., data = updated_Dataset)
 updated_fullmodel
 
 ```
@@ -159,11 +158,160 @@ updated_fullmodel
 **FITTING THE UPDATED FULL MODEL**
 
 ```{r}
-str(updated_fullmodel)
-round(stat.desc(updated_fullmodel),2)
+str(updated_Dataset)
+round(stat.desc(updated_Dataset),2)
 
-glm_updated_full = glm(quality ~., data= updated_fullmodel)
+glm_updated_full = glm(quality ~., data= updated_Dataset)
 
 glm_updated_full
+
+```
+
+## Investigating Correlation
+
+```{r}
+
+#Investigating multicollinearity and correlation 
+
+correlation_matrix<-round(cor(updated_Dataset),2) 
+correlation_matrix
+
+corrplot::corrplot(correlation_matrix)
+
+# investigating correlation between highlighted x variables
+
+```
+
+**INTERPRETATION**
+
+We can separate the interpretation into 2 parts:
+
+1)  First, the *y* variable with the other *x* variables:
+
+By referring to the last row under the correlation plot, we can identify the correlation between the dependent variable against all 11 other independent variables under this dataset. We notice out of all variables, there are two variables that stand out in terms of being correlated with *y* (quality), that being alcohol (vol.%) and also density (g/cm^3^). The exact correlation values are 0.49 and -0.36 respectively and a higher value means a stronger linear relationship, making x a potentially valuable predictor of y. However, we need to always consider multicollinearity to ensure the robustness of your regression model. Thus we move to the second part of the interpretation.
+
+2)  the *x* variables with each other (multicolinearity)
+
+By referring to the upper or lower non-diagonal entries under the correlation plot, it reveals very little correlation between the x variables, some of them are even orthogonal (no linear relationship between the regressors) indicating that muticollinearity is minimal under this dataset. This means that it is likely each predictor provides unique and useful information in predicting the dependent variable. However, there are two exceptions:
+
+-   Alcohol & Density : correlation value of -0.82
+
+-   Density & Residual sugar : correlation value of 0.84
+
+<br>
+
+```{r}
+
+# Investigate multicollinearity under full model
+
+vif_updated_full_model<-vif(updated_fullmodel)
+vif_updated_full_model
+
+# presence of VIF values more than 10 indicate that the full model is not good----------------------------------- compare with our best regression model later
+```
+
+## Fitting Simple Linear Model
+
+```{r}
+
+SLR<-lm(quality~alcohol,data=updated_Dataset)
+
+summary(SLR)
+round(summary(SLR)$adj.r.squared,4) # 0.2388
+round(summary(SLR)$sigma,4) #0.6936
+
+residuals_SLR<-residuals(SLR)
+RSS_SLR<-sum(residuals_SLR^2)
+RSS_SLR #2149.739
+
+
+```
+
+<br> 
+
+## Fitting Multiple Linear Regression
+
+```{r}
+
+#MLR_x_y 
+# x is the number of variables being fitted
+# y is the index of the model
+MLR_2_1<-SLR<-lm(quality~alcohol+fixed.acidity,data=updated_Dataset)
+MLR_2_2<-SLR<-lm(quality~alcohol+volatile.acidity,data=updated_Dataset)
+MLR_2_3<-SLR<-lm(quality~alcohol+citric.acid,data=updated_Dataset)
+MLR_2_4<-SLR<-lm(quality~alcohol+residual.sugar,data=updated_Dataset)
+MLR_2_5<-SLR<-lm(quality~alcohol+chlorides,data=updated_Dataset)
+MLR_2_6<-SLR<-lm(quality~alcohol+free.sulfur.dioxide,data=updated_Dataset)
+MLR_2_7<-SLR<-lm(quality~alcohol+total.sulfur.dioxide,data=updated_Dataset)
+MLR_2_8<-SLR<-lm(quality~alcohol+density,data=updated_Dataset)
+MLR_2_9<-SLR<-lm(quality~alcohol+pH,data=updated_Dataset)
+MLR_2_10<-SLR<-lm(quality~alcohol+sulphates,data=updated_Dataset)
+
+
+residuals_MLR_2_1<-residuals(MLR_2_1)
+RSS_MLR_2_1<-sum(residuals_MLR_2_1^2)
+RSS_MLR_2_1
+
+residuals_MLR_2_2<-residuals(MLR_2_2)
+RSS_MLR_2_2<-sum(residuals_MLR_2_2^2)
+RSS_MLR_2_2 
+
+residuals_MLR_2_3<-residuals(MLR_2_3)
+RSS_MLR_2_3<-sum(residuals_MLR_2_3^2)
+RSS_MLR_2_3
+
+residuals_MLR_2_4<-residuals(MLR_2_4)
+RSS_MLR_2_4<-sum(residuals_MLR_2_4^2)
+RSS_MLR_2_4
+
+residuals_MLR_2_5<-residuals(MLR_2_5)
+RSS_MLR_2_5<-sum(residuals_MLR_2_5^2)
+RSS_MLR_2_5
+
+residuals_MLR_2_6<-residuals(MLR_2_6)
+RSS_MLR_2_6<-sum(residuals_MLR_2_6^2)
+RSS_MLR_2_6
+
+residuals_MLR_2_7<-residuals(MLR_2_7)
+RSS_MLR_2_7<-sum(residuals_MLR_2_7^2)
+RSS_MLR_2_7
+
+residuals_MLR_2_8<-residuals(MLR_2_8)
+RSS_MLR_2_8<-sum(residuals_MLR_2_8^2)
+RSS_MLR_2_8
+
+residuals_MLR_2_9<-residuals(MLR_2_9)
+RSS_MLR_2_9<-sum(residuals_MLR_2_9^2)
+RSS_MLR_2_9
+
+residuals_MLR_2_10<-residuals(MLR_2_10)
+RSS_MLR_2_10<-sum(residuals_MLR_2_10^2)
+RSS_MLR_2_10
+
+
+```
+
+
+```{r}
+
+# MLR_2_2 has smallest RSS, so the next variable should be added is volatile.acidity
+
+summary(MLR_2_2)
+
+
+round(summary(MLR_2_2)$adj.r.squared,4) # 0.281, slr was 0.2388
+round(summary(MLR_2_2)$sigma,4) # 0.6741, slr was 0.6936
+
+#RSS for MLR_2_2 is 2030, SLR was 2149
+
+# so by comparison the MLR is better model when comparing all the values
+# now need to repeat steps by adding one new variable to this existing model consisting of alcohol and volatile acidity
+
+#now can investigate multicollinearity also
+
+vif_MLR_2_2<-vif(MLR_2_2)
+vif_MLR_2_2 #both variables are less than 5, so can proceed as scheduled
+
+
 
 ```
