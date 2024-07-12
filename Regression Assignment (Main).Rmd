@@ -22,6 +22,7 @@ library(AICcmodavg)
 library(leaps)
 library(corrplot)
 library(car)
+library(pastecs)
 
 ```
 
@@ -63,6 +64,11 @@ summary(Dataset)
 # do histogram, see that trend increase or smtg. 
 
 #not sure about this part
+
+round(stat.desc(Dataset),2)
+#another way to summarize the data set
+
+str(Dataset)
 
 ```
 
@@ -120,25 +126,34 @@ plot(hatvalues_fullmodel)
 abline(h= 2 * (length(fullmodel$coefficients)) / nrow(Dataset),col ="red")
 leverage_threshold=2*(length(fullmodel$coefficients)) / nrow(Dataset)
 
-#DFFITS values
-
-dffits_fullmodel<-dffits(fullmodel)
-plot(dffits_fullmodel)
-abline(h= 2 * sqrt((length(fullmodel$coefficients)) / nrow(Dataset)),col="red")
-dffits_threshold=2*(sqrt((length(fullmodel$coefficients))) / nrow(Dataset))
 
 
 #all flagged points that need to be removed
 
 high_studentized_residual_points<-which(studentized_residuals_fullmodel>residual_threshold)
 high_leverage_points<-which(hatvalues_fullmodel>leverage_threshold)
-high_dffits_points<-which(abs(dffits_fullmodel)>dffits_threshold)
+
 high_cooks_distance_points<-which(cd_fullmodel>cd_threshold)
 
-all_potential_issues=union(high_studentized_residual_points,high_leverage_points,high_dffits_points,high_cooks_distance_points)
+all_potential_issues=unique(c(high_studentized_residual_points,high_leverage_points,high_cooks_distance_points))
 
 updated_fullmodel<-Dataset[-all_potential_issues, ]
 
-
+updated_fullmodel
 
 ```
+
+**FITTING THE FULL MODEL**
+
+```{r}
+str(updated_fullmodel)
+round(stat.desc(updated_fullmodel),2)
+
+AIC_updated = AIC(updated_fullmodel)
+BIC_updated = BIC(updated_fullmodel)
+
+AIC_updated
+BIC_updated
+```
+
+
