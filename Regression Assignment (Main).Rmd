@@ -149,11 +149,10 @@ updated_fullmodel
 str(updated_fullmodel)
 round(stat.desc(updated_fullmodel),2)
 
-AIC_updated = AIC(updated_fullmodel)
-BIC_updated = BIC(updated_fullmodel)
+glm_updated_full = glm(quality ~., data= updated_fullmodel)
 
-AIC_updated
-BIC_updated
+glm_updated_full
+
 ```
 
 
