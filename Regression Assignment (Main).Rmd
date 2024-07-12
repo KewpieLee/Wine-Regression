@@ -1,15 +1,9 @@
 ---
-title: "MAT3024 Regression Analysis Assignment"
+title: "Regression Assignment (dduyi)"
 author: "Darren Yap Yee Shern"
 date: "`r Sys.Date()`"
-output:
-  rmdformats::readthedown
+output: html_document
 ---
-## Group 1
-
-Darren Yap Yee Shern (21001235) <br> Nur' Aliah Syamimi Binti Muhammad Sazali (21081765)<br> Chong Kai Yuan (21081609) <br> Ethan Lee Jia Hua (21089750) <br> Daniel Chin Wei Jian (20095204) <br> Harreesh Dev Chandrasager (20083200)
-
-<br>
 
 **INTRODUCTION**
 
@@ -17,7 +11,7 @@ Wine quality assessment is an important factor in the wine industry and the abil
 
 #### DATA PROCESSING
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 library(dplyr)
 library(MASS)
@@ -29,7 +23,6 @@ library(leaps)
 library(corrplot)
 library(car)
 library(pastecs)
-library(rmdformats)
 
 ```
 
@@ -65,20 +58,24 @@ Data source: [Wine Quality Dataset](https://www.semanticscholar.org/paper/Modeli
 **FINDING DESCRIPTIVE STATISTICS**
 
 ```{r}
-#To display the structure of chosen dataset.
+
+summary(Dataset)
+#interpret important parts, average min and max, as long as can provide information
+# do histogram, see that trend increase or smtg. 
+
+#not sure about this part
+
+round(stat.desc(Dataset),2)
+#another way to summarize the data set
+
 str(Dataset)
 
-<<<<<<< HEAD
-#To display descriptive statistics of chosen dataset.
-round(stat.desc(Dataset),2)
-=======
 ggplot(Dataset, aes(x = quality)) + 
   geom_bar() + 
   xlab("Wine Quality") + 
   ylab("Frequency") + 
   ggtitle("Distribution of Wine Quality")
 
->>>>>>> 31f569634892c2d5d5ffd2fda5eaef2f58a3819e
 ```
 
 **FITTING THE FULL MODEL**
