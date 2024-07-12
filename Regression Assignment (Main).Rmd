@@ -26,8 +26,8 @@ library(car)
 ```
 
 ```{r}
-
-Dataset<-read.csv("C:/Users/Darren/OneDrive - Sunway Education Group/UNI Y3/Regression/Assignment/dataset.csv", sep =";")
+getwd()
+Dataset<-read.csv("winequality-white.csv", sep =";")
 glimpse(Dataset)
 ```
 
