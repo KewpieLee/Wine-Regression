@@ -1,0 +1,222 @@
+---
+title: "Darren V1"
+author: "Presented by Group 1"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## INTRODUCTION
+
+Wine quality assessment is an important factor in the wine industry and the ability to predict the quality based on various chemical properties can enhance decision making processes in viticulture. In fact, chemical analysis of wine has been a well-established method for determining its quality; factors its acidity, sugar content and alcohol levels has been known to affect taste and overall consumer satisfaction.
+
+![](images/IMG_8911.png){width="300"}
+
+## DATA PROCESSING
+
+```{r message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(MASS)
+library(ggplot2)
+library(tidyverse)
+library(olsrr)
+library(AICcmodavg)
+library(leaps)
+library(corrplot)
+```
+
+```{r }
+
+Dataset<-read.csv("C:/Users/Darren/OneDrive - Sunway Education Group/UNI Y3/Regression/Assignment/dataset.csv", sep =";")
+
+
+glimpse(Dataset)
+
+#dataset consists of 4898 observations based on 12 variables
+
+
+
+```
+
+#### Dataset Description: Name
+
+The dataset provided is considered for *vinho verde*, a unique product from Minho from the northwest region in Portugal and was collected from May (2004) to February (2007). Note that both red and white wine datasets were available, but the white wine dataset was chosen for analysis because (\*\*\*)
+
+Variables Involved under considered dataset:
+
+1.  Sulphates (g(potassium sulphate)/dm^3^)
+2.  Chlorides (g(sodium chloride)/dm^3^)
+3.  Volatile acidity (g(acetic acid)/dm^3^)
+4.  Fixed acidity (g(tartaric acid)/dm^3^)
+5.  Total sulfur dioxide (mg/dm^3^)
+6.  Free sulfur dioxide (mg/dm^3^)
+7.  Residual sugar (g/dm^3^)
+8.  Citric acid (g/dm^3^)
+9.  Density (g/cm^3^)
+10. Alcohol (vol.%)
+11. pH level
+12. Quality
+
+This Dataset consists of 4898 observations based on 12 variables
+
+Data source: [Wine Quality Dataset](https://www.semanticscholar.org/paper/Modeling-wine-preferences-by-data-mining-from-Cortez-Cerdeira/bf15a0ccc14ac1deb5cea570c870389c16be019c)
+
+##### #explain number of variables and observations 
+
+#### Finding Descriptive Statistics
+
+```{r}
+
+summary(Dataset)
+#interpret important parts, average min and max, as long as can provide information
+# do histogram, see that trend increase or smtg. 
+
+```
+
+```{r}
+
+x_variables<-names(Dataset)[1:11]
+par(mfrow=c(3,4))
+
+for (i in 1:length(x_variables)) {
+  plot(Dataset$quality, Dataset[, x_variables[i]], main = paste("quality vs", x_variables[i])), 
+}
+
+
+```
+
+```{r}
+plot(Dataset$quality,Dataset$fixed.acidity)
+```
+
+```{r}
+correlation_matrix<-round(cor(Dataset),2) 
+correlation_matrix
+
+# this is correlation matrix to indentify collinearity, even with x variables with each other , can give a range instead of one by one pinpoint the importabnt ones. Calculate VID also
+
+# after doing multiple models, need to compare, check R2 values, add one more variable now check the R2, significant or not sig
+
+#highest is alcohol % , by inference, alcohol should be the first variable added , this is simple linear regression . we can do another simple linear regression, to compare and use other methods, maybe compare R2 values to finally conclude which should be chosen 
+
+#check multicollinearity
+
+#last need to check conclusion
+
+#check outlier by cook distance plot, eg we can remove first, check R2, if doessnt change, not influential can choose not to remove, but if influential can remove
+
+#check AIC and BIC, see lowest
+
+#after have variables, propose some way to link variables to why we choose those variables 
+```
+
+```{r}
+
+corrplot::corrplot(correlation_matrix)
+```
+
+### Fit the motel
+
+```{r}
+
+full_lm_model<-lm(quality~.,data=Dataset)
+summary(full_lm_model)
+
+```
+
+### Fit 3 smaller models
+
+```{r}
+
+model_1<-lm(quality~alcohol+pH+density,data=Dataset)
+model_2<-lm(quality~alcohol+pH,data=Dataset)
+model_3<-lm(quality~alcohol,data=Dataset)
+
+#use summary to check significance
+
+summary(model_3)
+summary(model_2)
+summary(model_1)
+
+round(summary(full_lm_model)$adj.r.squared,4)
+round(summary(model_1)$adj.r.squared,4)
+round(summary(model_2)$adj.r.squared,4)
+round(summary(model_3)$adj.r.squared,4)
+```
+
+### Calculate Mallows' Cp
+
+```{r}
+
+ols_mallows_cp(full_lm_model,full_lm_model) # we want it as low as possible
+ols_mallows_cp(model_1,full_lm_model)
+ols_mallows_cp(model_2,full_lm_model)
+ols_mallows_cp(model_3,full_lm_model)
+```
+
+### Model Selection
+
+```{r}
+
+models<-list(model_1,model_2,model_3)
+mod.names<-c("model1","model2","model3")
+aictab(cand.set = models,modnames=mod.names)
+```
+
+### Variable Selection
+
+```{r}
+
+#Best subset selection uszing BIC
+
+subset_model<-regsubsets(quality~.,data=Dataset, nbest=2,nvmax=11) #here we want 2 variables 
+summary(subset_model)
+
+# plot 
+
+plot(subset_model)
+
+```
+
+### Stepwise
+
+```{r}
+
+#Null model
+
+nullmodel<-glm(quality~1,data=Dataset)
+summary(nullmodel)
+
+
+#Full model
+
+fullmodel<-glm(quality~.,data=Dataset)
+summary(fullmodel)
+
+
+
+#look at the AIC value, AIC lower is better
+```
+
+### Performing stepwise regression model
+
+```{r}
+
+model.step<-step(nullmodel,scope=list(lower=nullmodel, upper=fullmodel,direction = "both"))
+
+#last one shows the best is 8 variables
+```
+
+```{r}
+#performing forward stepwise
+
+forward.model<-step(nullmodel,scope=list(lower=nullmodel,upper=fullmodel,direction="forward"))
+summary(forward.model)
+
+#performing backward stepwise
+
+backward.model<-step(fullmodel,direction = "backward")
+summary(backward.model)
+
+#only interpret the final 
+```
