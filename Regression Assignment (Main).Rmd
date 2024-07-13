@@ -315,3 +315,68 @@ vif_MLR_2_2 #both variables are less than 5, so can proceed as scheduled
 
 
 ```
+
+
+```{r, results = "hold"}
+cortable = as.data.frame(cor(updated_Dataset))
+cortablefiltered = subset(cortable, select = quality) 
+numbering = seq(12)
+names = names(cortable)
+
+data1 = data.frame(cortablefiltered, numbering, names)
+data1 = data1[-12,]
+data1$quality = abs(data1$quality)
+
+pairs = c(NULL)
+naming = names[-12]
+naming = naming[-11]
+nametest = naming
+
+a = 12
+b= 10
+
+for (i in 1:a) {
+  pvalue = c(NULL)
+  AIC = c(NULL)
+  count = c(NULL)
+  stop = FALSE
+  
+  framefull = data1 %>% arrange(desc(quality))
+  pairs[1] = framefull[1,3]
+  cat("\nquality ~", pairs[i], "+ \n")
+  
+  for (j in 1:b) {
+    formula = as.formula(paste("quality ~",pairs[i]," + ", nametest[j]))
+    pvalue[j] = (summary(lm(formula, data = updated_Dataset))$coefficients)[i+2,4]
+    AIC[j] = summary(glm(formula, data = updated_Dataset))$aic
+    cat("\n\n")
+    print(summary(lm(formula, data = updated_Dataset))$coefficients)
+    count[j] = j
+  }
+  
+  framefull2 = data.frame(pvalue, nametest, count)
+  framefull2 = framefull2 %>% arrange(pvalue)
+  nametest = nametest[-framefull2[1,3]]
+
+  pairs[i+1] = paste(c(pairs[i], framefull2[1,2]), collapse = " + ") 
+  b = b - 1
+  cat("\n", i," iteration done\n")
+  
+  cat("\nCurrent AIC: ", summary(glm(as.formula(paste("quality ~",pairs[i])), data = updated_Dataset))$aic, "\n\n")
+  
+  print(AIC)
+  
+  cat("\nP-values for each of next variables\n")
+  print(pvalue)
+  print("==========================================================")
+  
+  if (pvalue[framefull2[1,3]]>0.05){
+    stop = TRUE
+    formula2 = paste("quality ~", pairs[i])
+    print(summary(glm(formula2, data = updated_Dataset)))
+    break
+  }
+  if (stop){break}
+}
+```
+

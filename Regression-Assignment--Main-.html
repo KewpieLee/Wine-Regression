@@ -7,7 +7,7 @@
 
         <meta name="author" content="Group 1" />
     
-        <meta name="date" content="2024-07-12" />
+        <meta name="date" content="2024-07-13" />
     
     <title>MAT3024 Regression Analysis Assignment</title>
 
@@ -1294,7 +1294,7 @@ Assignment</a></h2>
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> Group
 1</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2024-07-12</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2024-07-13</p>
           </div>
    </div>
      
@@ -1863,6 +1863,687 @@ However, there are two exceptions:</p>
 <span id="cb65-9"><a href="#cb65-9" tabindex="-1"></a>vif_MLR_2_2 <span class="co">#both variables are less than 5, so can proceed as scheduled</span></span></code></pre></div>
 <pre><code>##          alcohol volatile.acidity 
 ##         1.002888         1.002888</code></pre>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a>cortable <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">cor</span>(updated_Dataset))</span>
+<span id="cb67-2"><a href="#cb67-2" tabindex="-1"></a>cortablefiltered <span class="ot">=</span> <span class="fu">subset</span>(cortable, <span class="at">select =</span> quality) </span>
+<span id="cb67-3"><a href="#cb67-3" tabindex="-1"></a>numbering <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">12</span>)</span>
+<span id="cb67-4"><a href="#cb67-4" tabindex="-1"></a>names <span class="ot">=</span> <span class="fu">names</span>(cortable)</span>
+<span id="cb67-5"><a href="#cb67-5" tabindex="-1"></a></span>
+<span id="cb67-6"><a href="#cb67-6" tabindex="-1"></a>data1 <span class="ot">=</span> <span class="fu">data.frame</span>(cortablefiltered, numbering, names)</span>
+<span id="cb67-7"><a href="#cb67-7" tabindex="-1"></a>data1 <span class="ot">=</span> data1[<span class="sc">-</span><span class="dv">12</span>,]</span>
+<span id="cb67-8"><a href="#cb67-8" tabindex="-1"></a>data1<span class="sc">$</span>quality <span class="ot">=</span> <span class="fu">abs</span>(data1<span class="sc">$</span>quality)</span>
+<span id="cb67-9"><a href="#cb67-9" tabindex="-1"></a></span>
+<span id="cb67-10"><a href="#cb67-10" tabindex="-1"></a>pairs <span class="ot">=</span> <span class="fu">c</span>(<span class="cn">NULL</span>)</span>
+<span id="cb67-11"><a href="#cb67-11" tabindex="-1"></a>naming <span class="ot">=</span> names[<span class="sc">-</span><span class="dv">12</span>]</span>
+<span id="cb67-12"><a href="#cb67-12" tabindex="-1"></a>naming <span class="ot">=</span> naming[<span class="sc">-</span><span class="dv">11</span>]</span>
+<span id="cb67-13"><a href="#cb67-13" tabindex="-1"></a>nametest <span class="ot">=</span> naming</span>
+<span id="cb67-14"><a href="#cb67-14" tabindex="-1"></a></span>
+<span id="cb67-15"><a href="#cb67-15" tabindex="-1"></a>a <span class="ot">=</span> <span class="dv">12</span></span>
+<span id="cb67-16"><a href="#cb67-16" tabindex="-1"></a>b<span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb67-17"><a href="#cb67-17" tabindex="-1"></a></span>
+<span id="cb67-18"><a href="#cb67-18" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>a) {</span>
+<span id="cb67-19"><a href="#cb67-19" tabindex="-1"></a>  pvalue <span class="ot">=</span> <span class="fu">c</span>(<span class="cn">NULL</span>)</span>
+<span id="cb67-20"><a href="#cb67-20" tabindex="-1"></a>  AIC <span class="ot">=</span> <span class="fu">c</span>(<span class="cn">NULL</span>)</span>
+<span id="cb67-21"><a href="#cb67-21" tabindex="-1"></a>  count <span class="ot">=</span> <span class="fu">c</span>(<span class="cn">NULL</span>)</span>
+<span id="cb67-22"><a href="#cb67-22" tabindex="-1"></a>  stop <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb67-23"><a href="#cb67-23" tabindex="-1"></a>  </span>
+<span id="cb67-24"><a href="#cb67-24" tabindex="-1"></a>  framefull <span class="ot">=</span> data1 <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(quality))</span>
+<span id="cb67-25"><a href="#cb67-25" tabindex="-1"></a>  pairs[<span class="dv">1</span>] <span class="ot">=</span> framefull[<span class="dv">1</span>,<span class="dv">3</span>]</span>
+<span id="cb67-26"><a href="#cb67-26" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">quality ~&quot;</span>, pairs[i], <span class="st">&quot;+ </span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb67-27"><a href="#cb67-27" tabindex="-1"></a>  </span>
+<span id="cb67-28"><a href="#cb67-28" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>b) {</span>
+<span id="cb67-29"><a href="#cb67-29" tabindex="-1"></a>    formula <span class="ot">=</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">&quot;quality ~&quot;</span>,pairs[i],<span class="st">&quot; + &quot;</span>, nametest[j]))</span>
+<span id="cb67-30"><a href="#cb67-30" tabindex="-1"></a>    pvalue[j] <span class="ot">=</span> (<span class="fu">summary</span>(<span class="fu">lm</span>(formula, <span class="at">data =</span> updated_Dataset))<span class="sc">$</span>coefficients)[i<span class="sc">+</span><span class="dv">2</span>,<span class="dv">4</span>]</span>
+<span id="cb67-31"><a href="#cb67-31" tabindex="-1"></a>    AIC[j] <span class="ot">=</span> <span class="fu">summary</span>(<span class="fu">glm</span>(formula, <span class="at">data =</span> updated_Dataset))<span class="sc">$</span>aic</span>
+<span id="cb67-32"><a href="#cb67-32" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb67-33"><a href="#cb67-33" tabindex="-1"></a>    <span class="fu">print</span>(<span class="fu">summary</span>(<span class="fu">lm</span>(formula, <span class="at">data =</span> updated_Dataset))<span class="sc">$</span>coefficients)</span>
+<span id="cb67-34"><a href="#cb67-34" tabindex="-1"></a>    count[j] <span class="ot">=</span> j</span>
+<span id="cb67-35"><a href="#cb67-35" tabindex="-1"></a>  }</span>
+<span id="cb67-36"><a href="#cb67-36" tabindex="-1"></a>  </span>
+<span id="cb67-37"><a href="#cb67-37" tabindex="-1"></a>  framefull2 <span class="ot">=</span> <span class="fu">data.frame</span>(pvalue, nametest, count)</span>
+<span id="cb67-38"><a href="#cb67-38" tabindex="-1"></a>  framefull2 <span class="ot">=</span> framefull2 <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pvalue)</span>
+<span id="cb67-39"><a href="#cb67-39" tabindex="-1"></a>  nametest <span class="ot">=</span> nametest[<span class="sc">-</span>framefull2[<span class="dv">1</span>,<span class="dv">3</span>]]</span>
+<span id="cb67-40"><a href="#cb67-40" tabindex="-1"></a></span>
+<span id="cb67-41"><a href="#cb67-41" tabindex="-1"></a>  pairs[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">c</span>(pairs[i], framefull2[<span class="dv">1</span>,<span class="dv">2</span>]), <span class="at">collapse =</span> <span class="st">&quot; + &quot;</span>) </span>
+<span id="cb67-42"><a href="#cb67-42" tabindex="-1"></a>  b <span class="ot">=</span> b <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb67-43"><a href="#cb67-43" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>, i,<span class="st">&quot; iteration done</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb67-44"><a href="#cb67-44" tabindex="-1"></a>  </span>
+<span id="cb67-45"><a href="#cb67-45" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Current AIC: &quot;</span>, <span class="fu">summary</span>(<span class="fu">glm</span>(<span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">&quot;quality ~&quot;</span>,pairs[i])), <span class="at">data =</span> updated_Dataset))<span class="sc">$</span>aic, <span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb67-46"><a href="#cb67-46" tabindex="-1"></a>  </span>
+<span id="cb67-47"><a href="#cb67-47" tabindex="-1"></a>  <span class="fu">print</span>(AIC)</span>
+<span id="cb67-48"><a href="#cb67-48" tabindex="-1"></a>  </span>
+<span id="cb67-49"><a href="#cb67-49" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">P-values for each of next variables</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb67-50"><a href="#cb67-50" tabindex="-1"></a>  <span class="fu">print</span>(pvalue)</span>
+<span id="cb67-51"><a href="#cb67-51" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">&quot;==========================================================&quot;</span>)</span>
+<span id="cb67-52"><a href="#cb67-52" tabindex="-1"></a>  </span>
+<span id="cb67-53"><a href="#cb67-53" tabindex="-1"></a>  <span class="cf">if</span> (pvalue[framefull2[<span class="dv">1</span>,<span class="dv">3</span>]]<span class="sc">&gt;</span><span class="fl">0.05</span>){</span>
+<span id="cb67-54"><a href="#cb67-54" tabindex="-1"></a>    stop <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb67-55"><a href="#cb67-55" tabindex="-1"></a>    formula2 <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;quality ~&quot;</span>, pairs[i])</span>
+<span id="cb67-56"><a href="#cb67-56" tabindex="-1"></a>    <span class="fu">print</span>(<span class="fu">summary</span>(<span class="fu">glm</span>(formula2, <span class="at">data =</span> updated_Dataset)))</span>
+<span id="cb67-57"><a href="#cb67-57" tabindex="-1"></a>    <span class="cf">break</span></span>
+<span id="cb67-58"><a href="#cb67-58" tabindex="-1"></a>  }</span>
+<span id="cb67-59"><a href="#cb67-59" tabindex="-1"></a>  <span class="cf">if</span> (stop){<span class="cf">break</span>}</span>
+<span id="cb67-60"><a href="#cb67-60" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## 
+## quality ~ alcohol + 
+## 
+## 
+##                  Estimate  Std. Error   t value      Pr(&gt;|t|)
+## (Intercept)    2.89341627 0.134079289 21.579890  2.489220e-98
+## alcohol        0.31711142 0.008595353 36.893358 2.484199e-260
+## fixed.acidity -0.04902708 0.013046307 -3.757928  1.735128e-04
+## 
+## 
+##                    Estimate Std. Error   t value      Pr(&gt;|t|)
+## (Intercept)       2.9531655 0.09196732  32.11103 9.602901e-204
+## alcohol           0.3278254 0.00832984  39.35554 4.175346e-291
+## volatile.acidity -1.8709469 0.11534011 -16.22113  1.531971e-57
+## 
+## 
+##              Estimate  Std. Error   t value      Pr(&gt;|t|)
+## (Intercept) 2.4312823 0.098370455 24.715575 1.617611e-126
+## alcohol     0.3220096 0.008575948 37.547984 2.053794e-268
+## citric.acid 0.2278051 0.097206895  2.343508  1.914697e-02
+## 
+## 
+##                  Estimate  Std. Error   t value      Pr(&gt;|t|)
+## (Intercept)    1.96701077 0.111189405 17.690631  9.646230e-68
+## alcohol        0.36095935 0.009738901 37.063664 1.993538e-262
+## residual.sugar 0.02020446 0.002385842  8.468485  3.331427e-17
+## 
+## 
+##               Estimate Std. Error   t value      Pr(&gt;|t|)
+## (Intercept)  3.0686182 0.12840453 23.898053 6.973219e-119
+## alcohol      0.2920822 0.00976276 29.917999 2.035546e-179
+## chlorides   -5.6945346 0.95083910 -5.988957  2.277688e-09
+## 
+## 
+##                       Estimate   Std. Error  t value      Pr(&gt;|t|)
+## (Intercept)         2.06969415 0.1019149214 20.30806  8.978000e-88
+## alcohol             0.34208060 0.0087838140 38.94443 6.735226e-286
+## free.sulfur.dioxide 0.00641216 0.0006862682  9.34352  1.433473e-20
+## 
+## 
+##                          Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          2.4529188782 0.1254825164 19.5478936  1.023184e-81
+## alcohol              0.3241192472 0.0096655641 33.5334021 4.293517e-220
+## total.sulfur.dioxide 0.0002261661 0.0002865465  0.7892824  4.299889e-01
+## 
+## 
+##              Estimate Std. Error   t value      Pr(&gt;|t|)
+## (Intercept) -31.54804 6.29284861 -5.013316  5.557128e-07
+## alcohol       0.38600 0.01479154 26.095992 7.608848e-140
+## density      33.58283 6.20231923  5.414559  6.466238e-08
+## 
+## 
+##              Estimate  Std. Error   t value      Pr(&gt;|t|)
+## (Intercept) 1.5119267 0.235704118  6.414511  1.559320e-10
+## alcohol     0.3164725 0.008584471 36.865689 5.434529e-260
+## pH          0.3300271 0.071165754  4.637443  3.628207e-06
+## 
+## 
+##              Estimate Std. Error   t value      Pr(&gt;|t|)
+## (Intercept) 2.2369583 0.10424707 21.458237  2.681675e-97
+## alcohol     0.3229069 0.00854159 37.804072 1.350621e-271
+## sulphates   0.5339578 0.09780526  5.459397  5.036464e-08
+## 
+##  1  iteration done
+## 
+## Current AIC:  9419.082 
+## 
+##  [1] 9406.973 9165.243 9415.590 9349.889 9385.334 9334.565 9420.459 9391.841
+##  [9] 9399.613 9391.356
+## 
+## P-values for each of next variables
+##  [1] 1.735128e-04 1.531971e-57 1.914697e-02 3.331427e-17 2.277688e-09
+##  [6] 1.433473e-20 4.299889e-01 6.466238e-08 3.628207e-06 5.036464e-08
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + 
+## 
+## 
+##                     Estimate Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       3.37591042 0.13353091  25.281864 6.436872e-132
+## alcohol           0.32398039 0.00835978  38.754655 1.704027e-283
+## volatile.acidity -1.88602142 0.11516038 -16.377347  1.374014e-58
+## fixed.acidity    -0.05526277 0.01267849  -4.358783  1.337280e-05
+## 
+## 
+##                      Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       2.949746808 0.100978100  29.211748 8.025553e-172
+## alcohol           0.327869408 0.008348053  39.274954 4.490153e-290
+## volatile.acidity -1.869574125 0.116560479 -16.039520  2.468220e-56
+## citric.acid       0.007836203 0.095522685   0.082035  9.346226e-01
+## 
+## 
+##                     Estimate  Std. Error   t value      Pr(&gt;|t|)
+## (Intercept)       2.30173419 0.109225979  21.07314  4.635369e-94
+## alcohol           0.37822859 0.009471332  39.93404 1.808240e-298
+## volatile.acidity -2.01377992 0.114667955 -17.56184  8.120558e-67
+## residual.sugar    0.02493961 0.002323451  10.73387  1.484097e-26
+## 
+## 
+##                    Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       3.3983335 0.126643230  26.833914 3.479904e-147
+## alcohol           0.3040305 0.009528518  31.907432 1.955228e-201
+## volatile.acidity -1.8323275 0.115268213 -15.896208  2.168681e-55
+## chlorides        -4.7258041 0.927138291  -5.097194  3.589718e-07
+## 
+## 
+##                         Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          2.533678977 0.103460704  24.489288 2.204552e-124
+## alcohol              0.346880754 0.008554964  40.547307 2.437112e-306
+## volatile.acidity    -1.809422818 0.114634296 -15.784306  1.169336e-54
+## free.sulfur.dioxide  0.005752526 0.000669272   8.595199  1.133681e-17
+## 
+## 
+##                           Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)           2.6718338611 0.1225133814  21.808506 2.782159e-100
+## alcohol               0.3434056863 0.0094537181  36.324934 2.284160e-253
+## volatile.acidity     -1.9360844611 0.1167170300 -16.587849  5.156729e-60
+## total.sulfur.dioxide  0.0009779298 0.0002818065   3.470217  5.249575e-04
+## 
+## 
+##                     Estimate Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)      -41.8619220 6.12979034  -6.829258  9.682299e-12
+## alcohol            0.4142627 0.01443364  28.701202 2.072109e-166
+## volatile.acidity  -1.9580837 0.11528630 -16.984530  9.606749e-63
+## density           44.1947408 6.04426706   7.311844  3.106579e-13
+## 
+## 
+##                    Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       2.1285584 0.232464000   9.156508  7.979901e-20
+## alcohol           0.3244013 0.008364044  38.785224 7.016623e-284
+## volatile.acidity -1.8459216 0.115343186 -16.003734  4.253663e-56
+## pH                0.2676855 0.069326174   3.861247  1.144054e-04
+## 
+## 
+##                    Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       2.7032547 0.105500293  25.623196 3.225193e-135
+## alcohol           0.3297132 0.008318704  39.635164 1.181577e-294
+## volatile.acidity -1.8430143 0.115204183 -15.997807  4.654453e-56
+## sulphates         0.4569428 0.095250186   4.797291  1.660683e-06
+## 
+##  2  iteration done
+## 
+## Current AIC:  9165.243 
+## 
+## [1] 9148.268 9167.237 9053.387 9141.314 9093.905 9155.206 9114.050 9152.346
+## [9] 9144.268
+## 
+## P-values for each of next variables
+## [1] 1.337280e-05 9.346226e-01 1.484097e-26 3.589718e-07 1.133681e-17
+## [6] 5.249575e-04 3.106579e-13 1.144054e-04 1.660683e-06
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + 
+## 
+## 
+##                     Estimate  Std. Error   t value      Pr(&gt;|t|)
+## (Intercept)       2.74925461 0.143771416  19.12240  2.074964e-78
+## alcohol           0.37480495 0.009475546  39.55497 1.266795e-293
+## volatile.acidity -2.03215226 0.114454359 -17.75513  3.311630e-68
+## residual.sugar    0.02530221 0.002319056  10.91057  2.267096e-27
+## fixed.acidity    -0.05973964 0.012520909  -4.77119  1.889860e-06
+## 
+## 
+##                     Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       2.33203979 0.115033794  20.272650  1.742616e-87
+## alcohol           0.37812093 0.009472511  39.917708 2.987491e-298
+## volatile.acidity -2.02867218 0.116034178 -17.483402  2.953601e-66
+## residual.sugar    0.02510752 0.002332109  10.766011  1.056840e-26
+## citric.acid      -0.07951761 0.094665399  -0.839986  4.009612e-01
+## 
+## 
+##                     Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       2.72831924 0.140122066  19.471018  4.103434e-81
+## alcohol           0.35521768 0.010575802  33.587776 1.022300e-220
+## volatile.acidity -1.97561291 0.114652305 -17.231341  1.803848e-64
+## residual.sugar    0.02460455 0.002318669  10.611498  5.362782e-26
+## chlorides        -4.43562175 0.916174748  -4.841458  1.332450e-06
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          2.106437058 0.1137007819  18.526144  7.010613e-74
+## alcohol              0.383812966 0.0094824370  40.476195 2.050960e-305
+## volatile.acidity    -1.947486373 0.1147805155 -16.967047  1.272022e-62
+## residual.sugar       0.021000522 0.0024083442   8.719901  3.867215e-18
+## free.sulfur.dioxide  0.004089122 0.0006905886   5.921213  3.435491e-09
+## 
+## 
+##                           Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)           2.2293543827 0.1286586761  17.327665  3.770532e-65
+## alcohol               0.3819004760 0.0100797589  37.887858 1.266076e-272
+## volatile.acidity     -2.0307260324 0.1157659974 -17.541645  1.133726e-66
+## residual.sugar        0.0243537456 0.0023877104  10.199623  3.656643e-24
+## total.sulfur.dioxide  0.0003047922 0.0002863208   1.064513  2.871540e-01
+## 
+## 
+##                      Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)       56.04161520 12.542367656   4.468185 8.083808e-06
+## alcohol            0.31034393  0.018448853  16.821855 1.286081e-61
+## volatile.acidity  -2.01231466  0.114446251 -17.583054 5.729616e-67
+## residual.sugar     0.04308934  0.004829039   8.922965 6.504028e-19
+## density          -53.46350897 12.477393766  -4.284830 1.867294e-05
+## 
+## 
+##                     Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       0.99723915 0.248946012   4.005845  6.280163e-05
+## alcohol           0.37774453 0.009436955  40.028221 1.152222e-299
+## volatile.acidity -1.98929335 0.114324613 -17.400394  1.150646e-65
+## residual.sugar    0.02725599 0.002348821  11.604116  1.078346e-30
+## pH                0.40382652 0.069311662   5.826242  6.067429e-09
+## 
+## 
+##                     Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)       2.00976459 0.121683614  16.516312  1.581326e-59
+## alcohol           0.38150573 0.009461560  40.321654 1.989762e-303
+## volatile.acidity -1.98622706 0.114426441 -17.358113  2.295272e-65
+## residual.sugar    0.02552721 0.002318808  11.008766  7.881223e-28
+## sulphates         0.50578081 0.094098395   5.375021  8.047703e-08
+## 
+##  3  iteration done
+## 
+## Current AIC:  9053.387 
+## 
+## [1] 9032.655 9054.680 9031.982 9020.424 9054.252 9037.044 9021.532 9026.557
+## 
+## P-values for each of next variables
+## [1] 1.889860e-06 4.009612e-01 1.332450e-06 3.435491e-09 2.871540e-01
+## [6] 1.867294e-05 6.067429e-09 8.047703e-08
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + 
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          2.522101416 0.1490253920  16.923971  2.533915e-62
+## alcohol              0.380382463 0.0094974116  40.051172 5.983687e-300
+## volatile.acidity    -1.968120924 0.1146563602 -17.165388  5.250393e-64
+## residual.sugar       0.021568930 0.0024072611   8.959946  4.681829e-19
+## free.sulfur.dioxide  0.003838619 0.0006916922   5.549606  3.028867e-08
+## fixed.acidity       -0.053890075 0.0125237717  -4.303023  1.720898e-05
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          2.148171675 0.1186281428  18.108449  8.830487e-71
+## alcohol              0.383731358 0.0094821165  40.468956 2.598299e-305
+## volatile.acidity    -1.968399266 0.1160209271 -16.965898  1.296848e-62
+## residual.sugar       0.021192812 0.0024132511   8.781851  2.254304e-18
+## free.sulfur.dioxide  0.004144843 0.0006920263   5.989430  2.271249e-09
+## citric.acid         -0.116488442 0.0944996790  -1.232686  2.177578e-01
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          2.534654975 0.1433181439  17.685514  1.053620e-67
+## alcohol              0.360695606 0.0105752163  34.107634 8.478602e-227
+## volatile.acidity    -1.908862395 0.1147600089 -16.633516  2.522123e-60
+## residual.sugar       0.020648985 0.0024032735   8.592025  1.165090e-17
+## free.sulfur.dioxide  0.004104297 0.0006888328   5.958336  2.744261e-09
+## chlorides           -4.460136449 0.9126646898  -4.886939  1.060061e-06
+## 
+## 
+##                           Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)           2.2765821872 0.1282766226  17.747444  3.767682e-68
+## alcohol               0.3737171748 0.0101125408  36.955814 4.452257e-261
+## volatile.acidity     -1.8697124164 0.1178759870 -15.861690  3.656345e-55
+## residual.sugar        0.0215790310 0.0024149223   8.935704  5.808811e-19
+## free.sulfur.dioxide   0.0054740270 0.0008433231   6.491020  9.454901e-11
+## total.sulfur.dioxide -0.0009950132 0.0003483246  -2.856569  4.302258e-03
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          55.111742386 1.249631e+01   4.410240 1.056860e-05
+## alcohol               0.316818059 1.841249e-02  17.206697 2.691739e-64
+## volatile.acidity     -1.946515227 1.145629e-01 -16.990793 8.707039e-63
+## residual.sugar        0.038929856 4.862482e-03   8.006169 1.496850e-15
+## free.sulfur.dioxide   0.004059882 6.893126e-04   5.889753 4.151771e-09
+## density             -52.731321694 1.243121e+01  -4.241850 2.261757e-05
+## 
+## 
+##                        Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          0.89366447 0.2488055543   3.591819  3.319147e-04
+## alcohol              0.38302718 0.0094529024  40.519532 5.805015e-306
+## volatile.acidity    -1.92843882 0.1144627017 -16.847749  8.531664e-62
+## residual.sugar       0.02340842 0.0024405147   9.591591  1.398570e-21
+## free.sulfur.dioxide  0.00384641 0.0006897841   5.576252  2.602556e-08
+## pH                   0.37902090 0.0692223352   5.475413  4.604406e-08
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          1.847388828 0.1247303072  14.811066  1.730408e-48
+## alcohol              0.386519124 0.0094727507  40.803261 1.274626e-309
+## volatile.acidity    -1.925882797 0.1145569043 -16.811582  1.515218e-61
+## residual.sugar       0.021779144 0.0024070025   9.048243  2.124276e-19
+## free.sulfur.dioxide  0.003846276 0.0006904696   5.570522  2.689007e-08
+## sulphates            0.468842808 0.0940176682   4.986752  6.373251e-07
+## 
+##  4  iteration done
+## 
+## Current AIC:  9020.424 
+## 
+## [1] 9003.921 9020.903 8998.573 9014.260 9004.443 8992.504 8997.592
+## 
+## P-values for each of next variables
+## [1] 1.720898e-05 2.177578e-01 1.060061e-06 4.302258e-03 2.261757e-05
+## [6] 4.604406e-08 6.373251e-07
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + 
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          1.358952862 0.3217528101   4.223593  2.452303e-05
+## alcohol              0.381187234 0.0094828916  40.197363 8.183524e-302
+## volatile.acidity    -1.943911062 0.1146102015 -16.961065  1.402411e-62
+## residual.sugar       0.023291264 0.0024399106   9.545950  2.155617e-21
+## free.sulfur.dioxide  0.003746392 0.0006908555   5.422830  6.176113e-08
+## pH                   0.308794699 0.0757408517   4.076990  4.641670e-05
+## fixed.acidity       -0.031190990 0.0136856185  -2.279107  2.270771e-02
+## 
+## 
+##                         Estimate   Std. Error     t value      Pr(&gt;|t|)
+## (Intercept)          0.922775577 0.2577359509   3.5803138  3.468344e-04
+## alcohol              0.383007541 0.0094538711  40.5133025 7.138728e-306
+## volatile.acidity    -1.936074453 0.1158211253 -16.7160736  6.876099e-61
+## residual.sugar       0.023448122 0.0024424557   9.6002242  1.288553e-21
+## free.sulfur.dioxide  0.003869021 0.0006918172   5.5925486  2.371198e-08
+## pH                   0.374544922 0.0699948454   5.3510358  9.183356e-08
+## citric.acid         -0.041278873 0.0952512243  -0.4333684  6.647681e-01
+## 
+## 
+##                         Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          1.314150073 0.2621579277   5.012818  5.571619e-07
+## alcohol              0.359571003 0.0105420089  34.108395 8.409758e-227
+## volatile.acidity    -1.889046332 0.1144342017 -16.507708  1.811932e-59
+## residual.sugar       0.023079348 0.0024349535   9.478353  4.075963e-21
+## free.sulfur.dioxide  0.003859031 0.0006879628   5.609361  2.153452e-08
+## pH                   0.383346954 0.0690445675   5.552167  2.985161e-08
+## chlorides           -4.523775424 0.9097030771  -4.972804  6.846833e-07
+## 
+## 
+##                          Estimate   Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)           1.029496511 0.2518112178   4.088366  4.420656e-05
+## alcohol               0.371151932 0.0100863224  36.797548 3.979523e-259
+## volatile.acidity     -1.836275121 0.1175991962 -15.614691  1.476534e-53
+## residual.sugar        0.024212822 0.0024495398   9.884641  8.310249e-23
+## free.sulfur.dioxide   0.005457031 0.0008403180   6.494007  9.271191e-11
+## pH                    0.398899888 0.0693977723   5.748022  9.630879e-09
+## total.sulfur.dioxide -0.001166330 0.0003483585  -3.348072  8.204991e-04
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          81.830637762 1.297857e+01   6.305057 3.159729e-10
+## alcohol               0.279887309 1.902736e-02  14.709729 7.254141e-48
+## volatile.acidity     -1.920036312 1.139878e-01 -16.844230 9.030878e-62
+## residual.sugar        0.051808367 5.161177e-03  10.038091 1.835641e-23
+## free.sulfur.dioxide   0.003713448 6.872048e-04   5.403700 6.868016e-08
+## pH                    0.516551285 7.237105e-02   7.137540 1.103829e-12
+## density             -80.956399620 1.297932e+01  -6.237337 4.863112e-10
+## 
+## 
+##                         Estimate  Std. Error    t value      Pr(&gt;|t|)
+## (Intercept)          0.822089449 0.248935002   3.302426  9.660684e-04
+## alcohol              0.385417314 0.009452741  40.773076 3.198775e-309
+## volatile.acidity    -1.912448907 0.114315483 -16.729570  5.556138e-61
+## residual.sugar       0.023774590 0.002437585   9.753338  2.973466e-22
+## free.sulfur.dioxide  0.003670158 0.000689799   5.320620  1.084799e-07
+## pH                   0.332754855 0.069973656   4.755430  2.042663e-06
+## sulphates            0.397473654 0.094984036   4.184636  2.911168e-05
+## 
+##  5  iteration done
+## 
+## Current AIC:  8992.504 
+## 
+## [1] 8989.304 8994.316 8969.805 8983.291 8955.707 8976.999
+## 
+## P-values for each of next variables
+## [1] 2.270771e-02 6.647681e-01 6.846833e-07 8.204991e-04 4.863112e-10
+## [6] 2.911168e-05
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + 
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          1.480935e+02 2.052652e+01   7.214742 6.318350e-13
+## alcohol              1.990796e-01 2.716128e-02   7.329536 2.727508e-13
+## volatile.acidity    -1.867945e+00 1.144663e-01 -16.318729 3.416403e-58
+## residual.sugar       7.587621e-02 7.745016e-03   9.796779 1.953937e-22
+## free.sulfur.dioxide  3.893723e-03 6.873181e-04   5.665096 1.561805e-08
+## pH                   8.360226e-01 1.054097e-01   7.931176 2.722856e-15
+## density             -1.485909e+02 2.078368e+01  -7.149406 1.013520e-12
+## fixed.acidity        9.086089e-02 2.183246e-02   4.161734 3.217901e-05
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          86.489302507 13.461978109   6.424710 1.459339e-10
+## alcohol               0.273896430  0.019574583  13.992453 1.427307e-43
+## volatile.acidity     -1.895822641  0.115486740 -16.415934 7.574162e-59
+## residual.sugar        0.053351433  0.005295162  10.075505 1.266205e-23
+## free.sulfur.dioxide   0.003635402  0.000689762   5.270517 1.424604e-07
+## pH                    0.538526032  0.074308295   7.247186 4.989311e-13
+## density             -85.706639932 13.481571887  -6.357318 2.258646e-10
+## citric.acid           0.128235716  0.098510732   1.301744 1.930712e-01
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          74.068149837 13.093948597   5.656670 1.639834e-08
+## alcohol               0.270766415  0.019124292  14.158245 1.511097e-44
+## volatile.acidity     -1.888201655  0.114053083 -16.555464 8.595401e-60
+## residual.sugar        0.048689231  0.005208206   9.348560 1.368691e-20
+## free.sulfur.dioxide   0.003737243  0.000686021   5.447710 5.376749e-08
+## pH                    0.506356891  0.072286750   7.004837 2.842438e-12
+## density             -72.843164898 13.107385780  -5.557414 2.897465e-08
+## chlorides            -3.752548467  0.917231400  -4.091169 4.367782e-05
+## 
+## 
+##                           Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)           7.557550e+01 1.366755e+01   5.529559 3.393627e-08
+## alcohol               2.825023e-01 1.910929e-02  14.783505 2.560028e-48
+## volatile.acidity     -1.878509e+00 1.174775e-01 -15.990370 5.226930e-56
+## residual.sugar        4.995986e-02 5.313944e-03   9.401655 8.354978e-21
+## free.sulfur.dioxide   4.461007e-03 8.572924e-04   5.203600 2.042355e-07
+## pH                    5.149153e-01 7.237062e-02   7.114978 1.297981e-12
+## density              -7.463757e+01 1.368203e+01  -5.455155 5.157687e-08
+## total.sulfur.dioxide -5.338286e-04 3.660875e-04  -1.458199 1.448560e-01
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          1.008306e+02 1.332370e+01   7.567761 4.584983e-14
+## alcohol              2.589997e-01 1.928256e-02  13.431808 2.371489e-40
+## volatile.acidity    -1.894930e+00 1.136370e-01 -16.675298 1.309187e-60
+## residual.sugar       5.904108e-02 5.285489e-03  11.170410 1.358778e-28
+## free.sulfur.dioxide  3.427191e-03 6.863237e-04   4.993550 6.154175e-07
+## pH                   4.821079e-01 7.233327e-02   6.665092 2.966599e-11
+## density             -1.000644e+02 1.332885e+01  -7.507354 7.243001e-14
+## sulphates            5.747794e-01 9.730991e-02   5.906689 3.749962e-09
+## 
+##  6  iteration done
+## 
+## Current AIC:  8955.707 
+## 
+## [1] 8940.390 8956.010 8940.971 8955.578 8922.892
+## 
+## P-values for each of next variables
+## [1] 3.217901e-05 1.930712e-01 4.367782e-05 1.448560e-01 3.749962e-09
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + 
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          1.978567e+02 2.159128e+01   9.163729 7.475892e-20
+## alcohol              1.411941e-01 2.822393e-02   5.002640 5.872465e-07
+## volatile.acidity    -1.816348e+00 1.140749e-01 -15.922416 1.464862e-55
+## residual.sugar       9.435789e-02 8.133302e-03  11.601425 1.112773e-30
+## free.sulfur.dioxide  3.614482e-03 6.847052e-04   5.278888 1.361441e-07
+## pH                   9.212974e-01 1.055245e-01   8.730649 3.523426e-18
+## density             -1.990342e+02 2.186439e+01  -9.103123 1.295431e-19
+## sulphates            7.051938e-01 9.963259e-02   7.077943 1.691636e-12
+## fixed.acidity        1.271326e-01 2.230987e-02   5.698493 1.286526e-08
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          1.051168e+02 1.377954e+01   7.628467 2.885889e-14
+## alcohol              2.534769e-01 1.980710e-02  12.797275 7.498672e-37
+## volatile.acidity    -1.872426e+00 1.151221e-01 -16.264698 7.872272e-58
+## residual.sugar       6.045788e-02 5.411596e-03  11.171911 1.336871e-28
+## free.sulfur.dioxide  3.355287e-03 6.888189e-04   4.871072 1.148387e-06
+## pH                   5.027083e-01 7.427901e-02   6.767838 1.476578e-11
+## density             -1.044357e+02 1.380250e+01  -7.566430 4.631756e-14
+## sulphates            5.730067e-01 9.731550e-02   5.888134 4.192529e-09
+## citric.acid          1.195959e-01 9.815211e-02   1.218475 2.231080e-01
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          93.075901799 1.343172e+01   6.929560 4.824933e-12
+## alcohol               0.249772672 1.937723e-02  12.890009 2.361449e-37
+## volatile.acidity     -1.862852865 1.136988e-01 -16.384107 1.242473e-58
+## residual.sugar        0.055924013 5.329730e-03  10.492841 1.840235e-25
+## free.sulfur.dioxide   0.003450354 6.851154e-04   5.036165 4.936957e-07
+## pH                    0.471765285 7.224693e-02   6.529901 7.316945e-11
+## density             -91.957356281 1.344900e+01  -6.837484 9.149198e-12
+## sulphates             0.576313100 9.713605e-02   5.933051 3.198641e-09
+## chlorides            -3.773277227 9.137429e-01  -4.129474 3.702447e-05
+## 
+## 
+##                           Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)           9.346927e+01 1.393722e+01   6.706453 2.242930e-11
+## alcohol               2.618580e-01 1.934340e-02  13.537333 6.000429e-41
+## volatile.acidity     -1.843499e+00 1.171651e-01 -15.734207 2.486728e-54
+## residual.sugar        5.689307e-02 5.417940e-03  10.500867 1.693749e-25
+## free.sulfur.dioxide   4.340535e-03 8.541872e-04   5.081480 3.898150e-07
+## pH                    4.795156e-01 7.232967e-02   6.629583 3.766839e-11
+## density              -9.262673e+01 1.395471e+01  -6.637666 3.567937e-11
+## sulphates             5.845075e-01 9.743647e-02   5.998857 2.144355e-09
+## total.sulfur.dioxide -6.556745e-04 3.652259e-04  -1.795257 7.268039e-02
+## 
+##  7  iteration done
+## 
+## Current AIC:  8922.892 
+## 
+## [1] 8892.471 8923.404 8907.837 8921.663
+## 
+## P-values for each of next variables
+## [1] 1.286526e-08 2.231080e-01 3.702447e-05 7.268039e-02
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + 
+## 
+## 
+##                          Estimate   Std. Error     t value     Pr(&gt;|t|)
+## (Intercept)          1.994429e+02 2.169462e+01   9.1931971 5.715813e-20
+## alcohol              1.390710e-01 2.836547e-02   4.9028272 9.782399e-07
+## volatile.acidity    -1.803288e+00 1.153885e-01 -15.6279659 1.214570e-53
+## residual.sugar       9.484659e-02 8.159491e-03  11.6240823 8.605486e-31
+## free.sulfur.dioxide  3.567939e-03 6.875163e-04   5.1896068 2.200997e-07
+## pH                   9.292194e-01 1.060516e-01   8.7619571 2.682810e-18
+## density             -2.006518e+02 2.197048e+01  -9.1327879 9.903216e-20
+## sulphates            7.026649e-01 9.969388e-02   7.0482258 2.090304e-12
+## fixed.acidity        1.257365e-01 2.238769e-02   5.6163236 2.069160e-08
+## citric.acid          7.399145e-02 9.815426e-02   0.7538282 4.509922e-01
+## 
+## 
+##                          Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)          1.823061e+02 2.210300e+01   8.248027 2.097525e-16
+## alcohol              1.453690e-01 2.822417e-02   5.150515 2.709724e-07
+## volatile.acidity    -1.798684e+00 1.140874e-01 -15.765840 1.549327e-54
+## residual.sugar       8.846535e-02 8.328428e-03  10.622095 4.804610e-26
+## free.sulfur.dioxide  3.614544e-03 6.839878e-04   5.284516 1.320512e-07
+## pH                   8.704388e-01 1.065913e-01   8.166134 4.105862e-16
+## density             -1.830167e+02 2.240108e+01  -8.169997 3.978384e-16
+## sulphates            6.937243e-01 9.959196e-02   6.965665 3.746133e-12
+## fixed.acidity        1.147723e-01 2.261484e-02   5.075086 4.030790e-07
+## chlorides           -2.976533e+00 9.246429e-01  -3.219116 1.295077e-03
+## 
+## 
+##                           Estimate   Std. Error    t value     Pr(&gt;|t|)
+## (Intercept)           1.912206e+02 2.255455e+01   8.478141 3.071730e-17
+## alcohol               1.457829e-01 2.858179e-02   5.100551 3.527191e-07
+## volatile.acidity     -1.788978e+00 1.172024e-01 -15.264005 2.579614e-51
+## residual.sugar        9.224563e-02 8.393976e-03  10.989504 9.711712e-28
+## free.sulfur.dioxide   4.130867e-03 8.522517e-04   4.847003 1.295996e-06
+## pH                    9.087909e-01 1.062374e-01   8.554341 1.608200e-17
+## density              -1.923058e+02 2.284224e+01  -8.418868 5.062424e-17
+## sulphates             7.074694e-01 9.965729e-02   7.099023 1.455185e-12
+## fixed.acidity         1.239405e-01 2.252925e-02   5.501316 3.980621e-08
+## total.sulfur.dioxide -3.740801e-04 3.676149e-04  -1.017587 3.089295e-01
+## 
+##  8  iteration done
+## 
+## Current AIC:  8892.471 
+## 
+## [1] 8893.902 8884.097 8893.433
+## 
+## P-values for each of next variables
+## [1] 0.450992200 0.001295077 0.308929475
+## [1] &quot;==========================================================&quot;
+## 
+## quality ~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides + 
+## 
+## 
+##                          Estimate   Std. Error     t value     Pr(&gt;|t|)
+## (Intercept)          1.837379e+02 2.222441e+01   8.2673950 1.787906e-16
+## alcohol              1.435864e-01 2.837166e-02   5.0609101 4.340549e-07
+## volatile.acidity    -1.788067e+00 1.153687e-01 -15.4987231 8.254152e-53
+## residual.sugar       8.891533e-02 8.360452e-03  10.6352303 4.188674e-26
+## free.sulfur.dioxide  3.576202e-03 6.868149e-04   5.2069378 2.006251e-07
+## pH                   8.773739e-01 1.071818e-01   8.1858449 3.495190e-16
+## density             -1.844781e+02 2.252584e+01  -8.1896220 3.388808e-16
+## sulphates            6.917332e-01 9.965039e-02   6.9416005 4.435280e-12
+## fixed.acidity        1.137215e-01 2.267958e-02   5.0142701 5.530142e-07
+## chlorides           -2.952595e+00 9.255094e-01  -3.1902380 1.431411e-03
+## citric.acid          6.095359e-02 9.813856e-02   0.6210972 5.345674e-01
+## 
+## 
+##                           Estimate   Std. Error     t value     Pr(&gt;|t|)
+## (Intercept)           1.768088e+02 2.298405e+01   7.6926731 1.761998e-14
+## alcohol               1.492519e-01 2.857361e-02   5.2234171 1.836578e-07
+## volatile.acidity     -1.775435e+00 1.171609e-01 -15.1538215 1.278453e-50
+## residual.sugar        8.672723e-02 8.563582e-03  10.1274472 7.546697e-24
+## free.sulfur.dioxide   4.057317e-03 8.516999e-04   4.7637867 1.960290e-06
+## pH                    8.603454e-01 1.072200e-01   8.0241101 1.296576e-15
+## density              -1.774460e+02 2.329379e+01  -7.6177367 3.133071e-14
+## sulphates             6.958176e-01 9.962352e-02   6.9844713 3.281928e-12
+## fixed.acidity         1.121883e-01 2.280852e-02   4.9187024 9.025575e-07
+## chlorides            -2.939645e+00 9.256336e-01  -3.1758191 1.504327e-03
+## total.sulfur.dioxide -3.207542e-04 3.676247e-04  -0.8725045 3.829802e-01
+## 
+##  9  iteration done
+## 
+## Current AIC:  8884.097 
+## 
+## [1] 8885.711 8885.334
+## 
+## P-values for each of next variables
+## [1] 0.5345674 0.3829802
+## [1] &quot;==========================================================&quot;
+## 
+## Call:
+## glm(formula = formula2, data = updated_Dataset)
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          1.823e+02  2.210e+01   8.248  &lt; 2e-16 ***
+## alcohol              1.454e-01  2.822e-02   5.151 2.71e-07 ***
+## volatile.acidity    -1.799e+00  1.141e-01 -15.766  &lt; 2e-16 ***
+## residual.sugar       8.847e-02  8.328e-03  10.622  &lt; 2e-16 ***
+## free.sulfur.dioxide  3.615e-03  6.840e-04   5.285 1.32e-07 ***
+## pH                   8.704e-01  1.066e-01   8.166 4.11e-16 ***
+## density             -1.830e+02  2.240e+01  -8.170 3.98e-16 ***
+## sulphates            6.937e-01  9.959e-02   6.966 3.75e-12 ***
+## fixed.acidity        1.148e-01  2.261e-02   5.075 4.03e-07 ***
+## chlorides           -2.977e+00  9.246e-01  -3.219   0.0013 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for gaussian family taken to be 0.4261068)
+## 
+##     Null deviance: 2824.8  on 4469  degrees of freedom
+## Residual deviance: 1900.4  on 4460  degrees of freedom
+## AIC: 8884.1
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
 </div>
 </div>
 
