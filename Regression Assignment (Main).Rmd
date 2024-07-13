@@ -24,11 +24,17 @@ Identify and quantify the impact of different physicochemical properties on the 
 
 ## Data Processing
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
+library(tidyr)
 library(dplyr)
 library(MASS)
+library(GGally)
+
 library(ggplot2)
+library(ggThemeAssist)
+library(esquisse)
+
 library(tidyverse)
 library(olsrr)
 library(AICcmodavg)
@@ -81,7 +87,13 @@ ggplot(Dataset, aes(x = quality)) +
   geom_bar() + 
   xlab("Wine Quality") + 
   ylab("Frequency") + 
-  ggtitle("Distribution of Wine Quality")
+  ggtitle("Distribution of Wine Quality") + theme(axis.title = element_text(family = "serif",
+    size = 14, face = "bold"), axis.text = element_text(size = 13),
+    plot.title = element_text(family = "serif",
+        size = 14, face = "bold.italic"),
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "cornsilk",
+        colour = "aliceblue"))
 
 ```
 
@@ -377,3 +389,28 @@ for (i in 1:a) {
   if (stop){break}
 }
 ```
+
+```{r}
+glm_multi1 = glm(quality ~ 
+                  alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides, 
+                data = updated_Dataset)
+
+car::vif(
+  mod = glm_multi
+) %>%
+  sort()
+
+glm_multi2 = glm(quality ~ 
+                  alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + sulphates + fixed.acidity + chlorides, 
+                data = updated_Dataset)
+
+car::vif(
+  mod = glm_multi2
+) %>%
+  sort()
+```
+
+
+
+
+
