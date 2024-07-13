@@ -165,6 +165,53 @@ updated_Dataset<-Dataset[-all_potential_issues, ]
 updated_fullmodel <- lm(quality ~ ., data = updated_Dataset)
 updated_fullmodel
 
+# Influece Plot/Bubble Plot
+
+influence_data <- data.frame(
+    leverage = hatvalues_fullmodel,
+    studentized_residual = studentized_residuals_fullmodel,
+    cooks_distance = cd_fullmodel
+)
+
+ggplot(influence_data, aes(x = leverage, y = studentized_residual)) +
+    geom_point(aes(size = cooks_distance), alpha = 0.5) +
+    scale_size_continuous(range = c(1, 10)) +  # Adjust point size range
+    geom_hline(yintercept = c(-3, 3), linetype = "dashed", color = "red") +  # Add reference lines for studentized residuals
+    geom_vline(xintercept = 2 * (length(fullmodel$coefficients) / nrow(Dataset)), linetype = "dashed", color = "blue") +  # Add reference line for leverage
+    labs(
+        title = "Influence Plot",
+        x = "Leverage",
+        y = "Studentized Residual",
+        size = "Cook's Distance"
+    ) +
+    theme_minimal()
+
+# Calculate leverage, studentized residuals, and Cook's distance for the updated model
+studentized_residuals_updated <- studres(updated_fullmodel)
+cd_updated <- cooks.distance(updated_fullmodel)
+hatvalues_updated <- hatvalues(updated_fullmodel)
+
+# Combine metrics into a data frame for the updated model
+removed_influence_data <- data.frame(
+    leverage = hatvalues_updated,
+    studentized_residual = studentized_residuals_updated,
+    cooks_distance = cd_updated
+)
+
+# Create the influence plot for the updated model
+ggplot(removed_influence_data, aes(x = leverage, y = studentized_residual)) +
+    geom_point(aes(size = cooks_distance), alpha = 0.5) +
+    scale_size_continuous(range = c(1, 10)) +
+    geom_hline(yintercept = c(-3, 3), linetype = "dashed", color = "red") +
+    geom_vline(xintercept = 2 * (length(updated_fullmodel$coefficients) / nrow(updated_Dataset)), linetype = "dashed", color = "blue") +
+    labs(
+        title = "Influence Plot (After Removal of Influential Points)",
+        x = "Leverage",
+        y = "Studentized Residual",
+        size = "Cook's Distance"
+    ) +
+    theme_minimal()
+
 ```
 
 **FITTING THE UPDATED FULL MODEL**
