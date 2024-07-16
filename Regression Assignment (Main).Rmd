@@ -68,7 +68,7 @@ str(Dataset)
 
 The dataset provided is considered for *vinho verde*, a unique product from Minho from the northwest region in Portugal and was collected from May (2004) to February (2007). Note that both red and white wine datasets were available, but the white wine dataset was chosen for analysis.
 
-![**Figure 1:** Vinho Verde White Wine](images/Vinho-Verde-03.jpg)
+![**Figure 1:** Vinho Verde White Wine](images/Vinho-Verde.jpg)
 
 <br>
 
