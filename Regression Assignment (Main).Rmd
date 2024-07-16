@@ -83,6 +83,9 @@ str(Dataset)
 #To display the descriptive statistics of our chosen dataset.
 round(stat.desc(Dataset),2)
 
+
+
+
 ggplot(Dataset, aes(x = quality)) + 
   geom_bar() + 
   xlab("Wine Quality") + 
@@ -247,11 +250,11 @@ We can separate the interpretation into 2 parts:
 
 1)  First, the *y* variable with the other *x* variables:
 
-By referring to the last row under the correlation plot, we can identify the correlation between the dependent variable against all 11 other independent variables under this dataset. We notice out of all variables, there are two variables that stand out in terms of being correlated with *y* (quality), that being alcohol (vol.%) and also density (g/cm^3^). The exact correlation values are 0.49 and -0.36 respectively and a higher value means a stronger linear relationship, making x a potentially valuable predictor of y. However, we need to always consider multicollinearity to ensure the robustness of your regression model. Thus we move to the second part of the interpretation.
+By referring to the last row under the correlation plot, we can identify the correlation between the dependent variable against all 11 other independent variables under this dataset. We notice out of all variables, there are two variables that stand out in terms of being correlated with *y* (quality), that being alcohol (vol.%) and also density (g/cm^3^). The exact correlation values are 0.49 and -0.36 respectively and a higher value means1 a stronger linear relationship, making x a potentially valuable predictor of y. However, we need to always consider multicollinearity to ensure the robustness of your regression model. Thus we move to the second part of the interpretation.
 
 2)  the *x* variables with each other (multicolinearity)
 
-By referring to the upper or lower non-diagonal entries under the correlation plot, it reveals very little correlation between the x variables, some of them are even orthogonal (no linear relationship between the regressors) indicating that muticollinearity is minimal under this dataset. This means that it is likely each predictor provides unique and useful information in predicting the dependent variable. However, there are two exceptions:
+By referring to the upper or lower non-diagonal entries under the correlation plot, it reveals very little correlation between the x variables, some of them are even orthogonal (no linear relationship between the regressors) indicating that muticollinearity is minimal under this dataset. This means1 that it is likely each predictor provides unique and useful information in predicting the dependent variable. However, there are two exceptions:
 
 -   Alcohol & Density : correlation value of -0.82
 
@@ -347,7 +350,6 @@ residuals_MLR_2_10<-residuals(MLR_2_10)
 RSS_MLR_2_10<-sum(residuals_MLR_2_10^2)
 RSS_MLR_2_10
 
-
 ```
 
 ```{r}
@@ -438,26 +440,144 @@ for (i in 1:a) {
 ```
 
 ```{r}
+glm_originalall = glm(quality ~., data = Dataset)
+
+glm_filteredall = glm(quality ~., data = updated_Dataset)
+
+#=============================================================================
+cat("===Influential removed, all variables in best fit===\n")
 glm_multi1 = glm(quality ~ 
-                  alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides, 
-                data = updated_Dataset)
+                   alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides, 
+                 data = updated_Dataset)
 
 car::vif(
   mod = glm_multi
 ) %>%
   sort()
 
+
+
+#=============================================================================
+cat("\n===Influential removed, removed @Density in best fit===\n")
 glm_multi2 = glm(quality ~ 
-                  alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + sulphates + fixed.acidity + chlorides, 
-                data = updated_Dataset)
+                   alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + sulphates + fixed.acidity + chlorides, 
+                 data = updated_Dataset)
 
 car::vif(
   mod = glm_multi2
 ) %>%
   sort()
+
+#=============================================================================
+cat("\n===Influential removed, removed @residual.sugar in best fit===\n")
+glm_multi3 = glm(quality ~ 
+                   alcohol + volatile.acidity + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides, 
+                 data = updated_Dataset)
+
+car::vif(
+  mod = glm_multi3
+) %>%
+  sort()
+
+#=============================================================================
+cat("\n===Influential removed, removed @alcohol in best fit===\n")
+glm_multi4 = glm(quality ~ 
+                   volatile.acidity + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides, 
+                 data = updated_Dataset)
+
+car::vif(
+  mod = glm_multi4
+) %>%
+  sort()
+
+#=============================================================================
+
+```
+
+```{r}
+summary(glm_originalall)
+summary(glm_filteredall)
+cat("\n===Influential removed, all variables in best fit===\n")
+summary(glm_multi1)
+cat("\n===Influential removed, removed @Density in best fit===\n")
+summary(glm_multi2)
+cat("\n===Influential removed, removed @residual.sugar in best fit===\n")
+summary(glm_multi3)
+cat("\n===Influential removed, removed @alcohol in best fit===\n")
+summary(glm_multi4)
+```
+
+```{r}
+bestfitcoeff = glm_multi1$coefficients
+means2 = c(NULL)
+mins2 = c(NULL)
+maxs2 = c(NULL)
+test2 = c(NULL)
+
+Dataset3 = updated_Dataset[, c(11,2,4,6,9,8,10,1,5)]
+Dataset4 = updated_Dataset[, c(11,2,4,6,9,8,10,1,5,12)]
+
+
+for (i in 1:length(Dataset3)) {
+  mins2[i] = min(Dataset3[,i])
+  means2[i] = mean(Dataset3[,i])
+  maxs2[i] = max(Dataset3[,i])
+}
+
+for (i in 1:nrow(Dataset4)) {
+  test2[i] = Dataset4[i,10] - (bestfitcoeff[1] + bestfitcoeff[2]*Dataset4[i,1] + bestfitcoeff[3]*Dataset4[i,2] + bestfitcoeff[4]*Dataset4[i,3] + bestfitcoeff[5]*Dataset4[i,4] + bestfitcoeff[6]*Dataset4[i,5] + bestfitcoeff[7]*Dataset4[i,6] + bestfitcoeff[8]*Dataset4[i,7] + bestfitcoeff[9]*Dataset4[i,8] + bestfitcoeff[10]*Dataset4[i,9])
+}
+
+
+stat.desc(updated_Dataset)
+#=============================================================================
+
+lowest2 = bestfitcoeff[1] + bestfitcoeff[2]*mins2[1] + bestfitcoeff[3]*maxs2[2] + bestfitcoeff[4]*mins2[3] + bestfitcoeff[5]*mins2[4] + bestfitcoeff[6]*mins2[5] + bestfitcoeff[7]*maxs2[6] + bestfitcoeff[8]*mins2[7] + bestfitcoeff[9]*mins2[8] + bestfitcoeff[10]*maxs2[9]
+
+avg2 = bestfitcoeff[1] + bestfitcoeff[2]*means2[1] + bestfitcoeff[3]*means2[2] + bestfitcoeff[4]*means2[3] + bestfitcoeff[5]*means2[4] + bestfitcoeff[6]*means2[5] + bestfitcoeff[7]*means2[6] + bestfitcoeff[8]*means2[7] + bestfitcoeff[9]*means2[8] + bestfitcoeff[10]*means2[9]
+
+highest2 = bestfitcoeff[1] + bestfitcoeff[2]*maxs2[1] + bestfitcoeff[3]*mins2[2] + bestfitcoeff[4]*maxs2[3] + bestfitcoeff[5]*maxs2[4] + bestfitcoeff[6]*maxs2[5] + bestfitcoeff[7]*mins2[6] + bestfitcoeff[8]*maxs2[7] + bestfitcoeff[9]*maxs2[8] + bestfitcoeff[10]*mins2[9]
+
+testy = bestfitcoeff[1] + bestfitcoeff[2]*test2[1] + bestfitcoeff[3]*test2[2] + bestfitcoeff[4]*test2[3] + bestfitcoeff[5]*test2[4] + bestfitcoeff[6]*test2[5] + bestfitcoeff[7]*test2[6] + bestfitcoeff[8]*test2[7] + bestfitcoeff[9]*test2[8] + bestfitcoeff[10]*test2[9]
+
+bestfitcoeff2 = round(bestfitcoeff,3)
+
+cat("y =",bestfitcoeff2[1],"+", bestfitcoeff2[2] , "(x1)","+", bestfitcoeff2[3] , "(x2)","+", bestfitcoeff2[4] , "(x3)", "+", bestfitcoeff2[5] , "(x4)", "+", bestfitcoeff2[6] , "(x5)", "+", bestfitcoeff2[7] , "(x6)", "+", bestfitcoeff2[8] , "(x7)", "+", bestfitcoeff2[9] , "(x8)")
+
+cat("\n\nThe lowest quality possible is", lowest2)
+cat("\n\nThe average quality possible is", avg2)
+cat("\n\nThe highest quality possible is", highest2)
+min(test2)
+max(test2)
+ols_mallows_cp(glm_multi3, updated_full_model)
 ```
 
 
 
+```{r}
+glm_multi3
+bestfitcoeff = glm_multi3$coefficients
+means2 = c(NULL)
+mins2 = c(NULL)
+maxs2 = c(NULL)
+test3 = c(NULL)
+
+Dataset5 = updated_Dataset[, c(11,2,6,9,8,10,1,5,12)]
+view(Dataset5)
 
 
+for (i in 1:nrow(Dataset4)) {
+  test3[i] = Dataset5[i,9] - (bestfitcoeff[1] + bestfitcoeff[2]*Dataset5[i,1] + bestfitcoeff[3]*Dataset5[i,2] + bestfitcoeff[4]*Dataset5[i,3] + bestfitcoeff[5]*Dataset5[i,4] + bestfitcoeff[6]*Dataset5[i,5] + bestfitcoeff[7]*Dataset5[i,6] + bestfitcoeff[8]*Dataset5[i,7] + bestfitcoeff[9]*Dataset5[i,8])
+}
+
+
+
+#=============================================================================
+
+
+
+min(test3)
+max(test3)
+
+```
+$y=1.745+0.36\ x_1-1.887\ x_2+0.023\ x_3+0.004\ x_4+0.259\ x_5+0.429\ x_6-0.033\ x_7-4.655\ x_8$

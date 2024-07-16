@@ -1,0 +1,929 @@
+---
+title: "MAT3024 Regression Analysis Assignment"
+author: "Group 1"
+date: "`r Sys.Date()`"
+output: rmdformats::readthedown
+---
+
+#### GROUP MEMBERS
+
+Chong Kai Yuan (21081609)\
+Ethan Lee Jia Hua (21089750)\
+Daniel Chin Wei Jian (20095204)\
+Darren Yap Yee Shern (21001235)\
+Harreesh Dev Chandrasager (20083200)\
+Nur' Aliah Syamimi Binti Muhammad Sazali (21081765)
+
+<br>
+
+#### INTRODUCTION & PROBLEM STATEMENT
+
+**Predicting Wine Quality Using Regression Analysis**
+
+Wine quality assessment is a crucial aspect of the wine industry. The ability to predict wine quality based on various chemical properties can significantly enhance decision-making processes in viticulture. Chemical analysis has long been an established method for determining wine quality, with factors such as acidity, sugar content, and alcohol levels known to influence taste and overall consumer satisfaction **(Jackson, 2008). #------------------------------------------------ revisit citation**
+
+Consumers rely heavily on quality ratings when selecting wines. Accurate predictions of wine quality enable producers to better meet consumer expectations, resulting in higher satisfaction and repeat purchases **(Lockshin & Rhodus, 1993).** This study aims to identify and quantify the impact of different physicochemical properties on the quality ratings of white Vinho Verde wines.
+
+**Determining Key Physicochemical Factors Influencing Wine Quality**
+
+Our primary objective is to create a regression model that highlights the most significant factors contributing to wine quality. The analysis will focus on identifying the key physicochemical properties that influence wine quality and quantifying their impact. As such, our task will help winemakers optimize their production processes and improve the quality of their wines.
+
+<br>
+
+#### DATA PROCESSING
+
+Load the use of all relevant packages used under this assignment
+
+```{r message=FALSE, warning=FALSE, results = "hold"}
+
+library(car)
+library(MASS)
+library(dplyr)
+library(olsrr)
+library(leaps)
+library(psych)
+library(ggplot2)
+library(pastecs)
+library(corrplot)
+library(tidyverse)
+library(AICcmodavg)
+library(ggThemeAssist)
+library(rmdformats)
+options(scipen=10)
+
+```
+
+Import dataset into R Studio
+
+```{r, results = "hold"}
+
+Dataset<-read.csv("winequality-white.csv", sep =";")
+str(Dataset)
+
+```
+
+**DATASET DESCRIPTION : WINE QUALITY DATASET**
+
+The dataset provided is considered for *vinho verde*, a unique product from Minho from the northwest region in Portugal and was collected from May (2004) to February (2007). Note that both red and white wine datasets were available, but the white wine dataset was chosen for analysis and the red wine dataset was used to validate and verify results![](images/clipboard-3269507061.png)
+
+Variables Involved under considered dataset:
+
+1.  Sulphates (g(potassium sulphate)/dm^3^)
+2.  Chlorides (g(sodium chloride)/dm^3^)
+3.  Volatile acidity (g(acetic acid)/dm^3^)
+4.  Fixed acidity (g(tartaric acid)/dm^3^)
+5.  Total sulfur dioxide (mg/dm^3^)
+6.  Free sulfur dioxide (mg/dm^3^)
+7.  Residual sugar (g/dm^3^)
+8.  Citric acid (g/dm^3^)
+9.  Density (g/cm^3^)
+10. Alcohol (vol.%)
+11. pH level
+12. Quality
+
+This Dataset consists of 4898 observations based on 12 variables
+
+Data source: [Wine Quality Dataset](https://www.kaggle.com/datasets/yasserh/wine-quality-dataset)
+
+<br>
+
+#### DATA ANALYSIS
+
+**DESCRIPTIVE STATISTICS (20%)**
+
+```{r, results = "hold"}
+
+round(stat.desc(Dataset),2)
+
+```
+
+**INTERPRETATION**
+
+-   **???, i notice that smallest minimum link to citric acid, largest max is total sulfur dioxide, both are the ones we exclude at the end?? what else to describe ———————————————————**
+
+-   **total sulfure dioxide also has greatest range ———————————————————**
+
+<br>
+
+**VIZUALIZING THE DEPENDENT VARIABLE**
+
+```{r, results = "hold"}
+
+ggplot(Dataset, aes(x = quality)) + 
+  geom_bar() + 
+  xlab("Wine Quality") + 
+  ylab("Frequency") + 
+  ggtitle("Distribution of Wine Quality")
+
+
+```
+
+**INTERPRETATION**
+
+-   **follows a bell shaped normal curve, slightly skewed to the right ————————————————————**
+
+-   **Remember change formating of x axis to pretend it is continuous ———————————————————**
+
+<br>
+
+**FITTING THE FULL MODEL**
+
+Here, we observe the model using the entirety of the wine dataset in terms of its AIC, BIC, Residual standard error and its R^2^. Additionally, we investigate the whether each of the predictor variables appear to be statistically significant in predicting our dependent variable
+
+```{r, results = "hold"}
+
+# fitting full model
+
+full_model<-lm(quality~.,data=Dataset)
+summary(full_model)
+
+# extracting and finding relevant metrics
+
+Residual_standard_error_full_model<-summary(full_model)$sigma
+R_squared_full_model<-summary(full_model)$r.squared
+full_model_AIC<-AIC(full_model)
+full_model_BIC<-BIC(full_model)
+
+# displaying results
+
+table_1 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error"),
+  full_model = c(full_model_AIC, full_model_BIC, R_squared_full_model, Residual_standard_error_full_model))
+
+# formatting table
+
+table_1$full_model <- format(table_1$full_model, digits = 5)
+
+# displaying table
+
+table_1
+
+```
+
+**OBSERVATION OF FULL MODEL**
+
+From the output of the summary of the dataset, we can observe that three predictor variables can be highlighted and appears to not be statistically significant. Those variables being:
+
+1.  Citric Acid (g/dm^3^)
+
+2.  Total sulfur dioxide (mg/dm^3^)
+
+3.  Chlorides (g(sodium chloride)/dm^3^)
+
+From here we can start making the hypothesis that when performing the variable selection process to find our "best" regression model, it is more likely than not that one or several of these variables will likely not be included under the fitted model.
+
+<br>
+
+**INVESTIGATING PROBLEMATIC DATA POINTS**
+
+Before we proceed into building our regression models, it is crucial to ensure the reliability and accuracy of our current dataset by investigating any potentially problematic observation points. In here, we decided to take into account the following metrics:
+
+1)  Leverage (*h~ii~*) - may affect regression coefficients
+
+2)  Cook's Distance (*D~i~*) - to observe influential points
+
+3)  Studentized Residuals (*r~i~*) - to observe potential outliers
+
+Observation points that exceed tolerated thresholds in these diagnostic measures will then be considered as problematic. Consequently, an updated full model will be created after removing these problematic points, ensuring a more robust and accurate predictive model.
+
+<br>
+
+**VISUALIZING MODEL USING DIAGNOSTIC PLOTS**
+
+```{r, results = "hold"}
+
+par(mfrow=c(2,2))
+plot(full_model,which=2) # QQ Residuals
+plot(full_model,which=5) # Residuals vs Leverage
+
+```
+
+**INTERPRETATION**
+
+QQ Residuals: The lines curve at the ends, implying that under the full model, the residuals have heavier tails than a normal distribution, this acts as an indicator for the presence of outliers in the dataset.
+
+Residuals vs Leverage: Presence of observations clearly outside the Cook's distance contour lines, indicating presence of influential points within the Dataset.
+
+Now, we will make use of the following thresholds in deciding which observations points are considered problematic which should be removed from our dataset.
+
+|   Diagnostic Value Tested    | Tolerated Threshold |
+|:----------------------------:|:-------------------:|
+| Studentized Residuals $(ri)$ |        $< 3$        |
+|    Cook's Distance $(Di)$    |       $< 4/n$       |
+|       Leverage $(hii)$       |      $< 2p/n$       |
+
+: Table 1: Diagnostics values and their associated thresholds
+
+Under different applications, the threshold for the cook's distance may also be $< 1$, however, we decided to use the threshold of $< 4/n$ instead being that in this way, the number of observations in the dataset is taken into account when performing our investigation of problematic observation points.
+
+```{r, results = "hold"}
+
+# studentized residuals 
+
+studentized_residuals_full_model<-studres(full_model)
+
+# cooks distance 
+
+cd_full_model<-cooks.distance(full_model)
+
+# leverage
+
+hat_values_full_model<-hatvalues(full_model)
+
+# plot for visualization
+
+par(mfrow=c(1,3))
+
+plot(studentized_residuals_full_model, main="Studentized residuals visualization", ylab="Studentized Residuals",xlab="Observation point")
+abline(h=3,col="red")
+abline(h=-3,col="red")
+
+plot(cd_full_model, main="Cook's distance visualization", ylab="cooks distance",xlab="Observation point")
+abline(h = 4/(nrow(Dataset)), col = "red")
+
+plot(hat_values_full_model, main="Leverage visualization",ylab="leverage", xlab="Observation point")
+abline(h= 2 * (length(full_model$coefficients)) / nrow(Dataset),col ="red")
+
+```
+
+```{r, results = "hold"}
+
+# indicate all flagged points that need to be removed
+
+high_studentized_residual_points<-which(studentized_residuals_full_model>(abs(3)))
+high_leverage_points<-which(hat_values_full_model>(2*(length(full_model$coefficients))/nrow(Dataset)))
+high_cooks_distance_points<-which(cd_full_model>(4/nrow(Dataset)))
+
+all_potential_issues<-unique(c(high_studentized_residual_points,high_leverage_points,high_cooks_distance_points))
+
+# create updated full model
+
+updated_Dataset<-Dataset[-all_potential_issues, ]
+
+```
+
+<br>
+
+**FITTING UPDATED FULL MODEL**
+
+```{r, results = "hold"}
+
+# fitting updated full model
+
+updated_full_model<-lm(quality~.,data=updated_Dataset)
+str(updated_Dataset)
+summary(updated_full_model)
+
+# extracting and finding relevant metrics
+
+Residual_standard_error_updated_full_model<-summary(updated_full_model)$sigma
+R_squared_updated_full_model<-summary(updated_full_model)$r.squared
+updated_full_model_AIC<-AIC(updated_full_model)
+updated_full_model_BIC<-BIC(updated_full_model)
+
+# displaying results
+
+table_2 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error"),
+  full_model = c(full_model_AIC, full_model_BIC, R_squared_full_model, Residual_standard_error_full_model),
+  updated_full_model = c(updated_full_model_AIC, updated_full_model_BIC, R_squared_updated_full_model, Residual_standard_error_updated_full_model))
+
+# formatting table
+
+table_2$full_model <- format(table_2$full_model, digits = 5)
+table_2$updated_full_model <- format(table_2$updated_full_model, digits = 5)
+
+# display updated table
+
+table_2
+
+```
+
+**INTERPRETATION**
+
+By inspection, the new dataset has 4470 observations which shows that a total of 428 observation points have been removed. At first glance, we can see that after removing the problematic points, the updated model evidently exhibit better model properties. It has a lower AIC and BIC value, which indicates that the model has an improved fit and better performance relative to the previous model. Additionally, it has a smaller residual standard error, which shows that the predictions of the model are more accurate while having less variability. The R-squared value is also higher, indicating that a greater proportion of the variance in the dependent variable is explained by the independent variables in the model which is ideal for a regression model.
+
+Additionally, from the output of the summary of the updated dataset, we can see that now only two of the predictor variables appears to not be statistically significant. Those variables being:
+
+1.  Citric Acid (g/dm^3^)
+
+2.  Total sulfur dioxide (mg/dm^3^)
+
+This strengthens our previous assumption that these variables have a higher chance of being excluded from the "best" regression model later when performing the variable selection process.
+
+<br>
+
+**INSPECTING UPDATED MODEL USING DIAGNOSTIC PLOTS**
+
+```{r, results = "hold"}
+
+par(mfrow=c(2,2))
+plot(updated_full_model,which=2) # QQ Residuals
+plot(updated_full_model,which=5) # Residuals vs Leverage
+
+```
+
+**INTERPRETATION**
+
+QQ Residuals: Seem to follow along the 45 degree reference line. This shows that under the new model, the residuals are better suited by assuming a normal distribution, which is an ideal condition for regression analysis.
+
+Residuals vs Leverage: There appear to be no points that lie outside the designated Cook's distance contour lines, indicating that there are no overly influential points under the new model.
+
+<br>
+
+#### FINDING "BEST" REGRESSION MODEL
+
+**INVESTIGATING CORRELATION**
+
+```{r, results = "hold"}
+
+# finding correlation values between all variables
+
+correlation_matrix<-round(cor(updated_Dataset),2) 
+correlation_matrix
+
+# visualize correlation in a diagram
+
+corrplot::corrplot(correlation_matrix)
+
+```
+
+**INTERPRETATION**
+
+We can separate the interpretation into 2 parts:
+
+1)  Dependent variable with the regressor variables:
+
+By referring to the last row under the correlation plot, we can identify the correlation between the dependent variable against all 11 other independent variables under this dataset. We notice out of all variables, there are two variables that stand out, that being alcohol (vol.%) and also density (g/cm^3^). The exact correlation values are 0.49 and -0.36 respectively and a higher value indicates a stronger linear relationship and the potential to be a valuable predictor of y.
+
+2)  Regressor variables with each other (multicollinearity)
+
+By referring to the upper or lower non-diagonal entries under the correlation plot, we observe that there appears to be very little correlation between the x variables, some of which are even orthogonal (no linear relationship between the regressors) and thus indicating that issues of multicollinearity is minimal under this dataset. In other words, this means that it is likely each predictor provides unique and valuable information in predicting the dependent variable. However, there are two exceptions when observing the correlation plot:
+
+-   Alcohol & Density : correlation value of -0.82
+
+-   Density & Residual sugar : correlation value of 0.84
+
+Both are relatively high in terms of their correlation, thus further investigation into their multicollinearity properties should be investigated using other diagnostics. In this case, we will make use of the "variance inflation factor" values to see how much the variance of the regression coefficients are inflated due to multicollinearity issues. Note that in our case, we will use the threshold as VIF values $> 10$ being considered to have high multicollinearity problems.
+
+-   **Ask ethan include linear plot between x variables ——————————————————————————————–**
+
+<br>
+
+**INVESTIGATING MULTICOLLINEARITY FOR FULL MODEL**
+
+```{r, results = "hold"}
+
+# investigating multicollinearity under model 
+
+vif_updated_full_model<-vif(updated_full_model)
+vif_updated_full_model
+
+# pinpoint key predictors with high vif values
+
+vif_alcohol_full_model <- vif_updated_full_model['alcohol']
+vif_density_full_model <- vif_updated_full_model['density']
+vif_residual_sugar_full_model <- vif_updated_full_model['residual.sugar']
+
+# display table with predictors showing high vif values
+
+table_3 <- data.frame(
+vif_full_model = c(vif_alcohol_full_model, vif_residual_sugar_full_model, vif_density_full_model ))
+
+table_3
+
+```
+
+**INTERPRETATION**
+
+Under the updated full model, these three variables exhibit high multicollinearity indications. Thus when building our regression models later, we will need to take into account these values and make appropriate adjustments if necessary.
+
+<br>
+
+**FITTING SIMPLE LINEAR MODEL**
+
+With the updated dataset, we are now ready to start finding our "best" regression model. We will employ the use of a forward step procedure where we start with including one regressor variable in our model, and work our way up towards the best regression model by adding one regressor variable at a time.
+
+In order to determine the first variable that should be included under the simple linear regression model, we will make use of the variable with the highest correlation value to our dependent variable, i.e. Alcohol (vol.%). Note that from here on out, "best_model_x" will refer to a the fitted model in respect to "x" number of variables, for example best_model_1 refers to 1 predictor being fitted in the model, or basically the best simple linear regression model.
+
+```{r, results = "hold"}
+
+# fitting the "best" simple linear model
+
+best_model_1<-lm(quality~alcohol,data = updated_Dataset)
+summary(best_model_1)
+
+# extracting and finding relevant metrics
+
+Residual_standard_error_best_model_1<-summary(best_model_1)$sigma
+R_squared__best_model_1<-summary(best_model_1)$r.squared
+best_model_1_AIC<-AIC(best_model_1)
+best_model_1_BIC<-BIC(best_model_1)
+
+# displaying results
+
+table_4 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error"),
+  updated_full_model = c(updated_full_model_AIC, updated_full_model_BIC, R_squared_updated_full_model, Residual_standard_error_updated_full_model),
+  best_model_1 = c(best_model_1_AIC, best_model_1_BIC, R_squared__best_model_1, Residual_standard_error_best_model_1))
+
+# formatting table
+
+table_4$best_model_1 <- format(table_4$best_model_1, digits = 5)
+table_4$updated_full_model <- format(table_4$updated_full_model, digits = 5)
+
+# display table of simple model and full model
+
+table_4
+
+
+```
+
+**INTERPRETATION**
+
+When comparing the metrics above with the simple linear model against the new full model, it is apparent that the simple linear model have values that are less ideal, such as a higher AIC and Residual standard error. However, this is to be expected as only one regressor has been added, in theory, as we add more explanatory variables, the metrics will eventually get more and more ideal unlike it reaches its optimum value stance where we can conclude the best model has been found.
+
+<br>
+
+**FITTING MULTIPLE LINEAR MODEL**
+
+To decide on the next variables added, we decided to see which of the remaining regressor variables when added to the current model has the best statistical significance. Then by setting our stopping criterion based on a p value of 0.05, any variables when added to the model results in a p value greater than 0.05 will be deemed as non helpful.
+
+-   **Ask ky further explain ———————————————————**
+
+```{r, results = "hold"}
+
+cortable = as.data.frame(cor(updated_Dataset))
+cortablefiltered = subset(cortable, select = quality) 
+numbering = seq(12)
+names = names(cortable)
+
+data1 = data.frame(cortablefiltered, numbering, names)
+data1 = data1[-12,]
+data1$quality = abs(data1$quality)
+
+pairs = c(NULL)
+naming = names[-12]
+naming = naming[-11]
+nametest = naming
+
+a = 12
+b= 10
+
+for (i in 1:a) {
+  pvalue = c(NULL)
+  AIC = c(NULL)
+  count = c(NULL)
+  stop = FALSE
+  
+  framefull = data1 %>% arrange(desc(quality))
+  pairs[1] = framefull[1,3]
+  cat("\nquality ~", pairs[i], "+ \n")
+  
+  for (j in 1:b) {
+    formula = as.formula(paste("quality ~",pairs[i]," + ", nametest[j]))
+    pvalue[j] = (summary(lm(formula, data = updated_Dataset))$coefficients)[i+2,4]
+    AIC[j] = summary(glm(formula, data = updated_Dataset))$aic
+    cat("\n\n")
+    print(summary(lm(formula, data = updated_Dataset))$coefficients)
+    count[j] = j
+  }
+  
+  framefull2 = data.frame(pvalue, nametest, count)
+  framefull2 = framefull2 %>% arrange(pvalue)
+  nametest = nametest[-framefull2[1,3]]
+
+  pairs[i+1] = paste(c(pairs[i], framefull2[1,2]), collapse = " + ") 
+  b = b - 1
+  cat("\n", i," iteration done\n")
+  
+  cat("\nCurrent AIC: ", summary(glm(as.formula(paste("quality ~",pairs[i])), data = updated_Dataset))$aic, "\n\n")
+  
+  print(AIC)
+  
+  cat("\nP-values for each of next variables\n")
+  print(pvalue)
+  print("==========================================================")
+  
+  if (pvalue[framefull2[1,3]]>0.05){
+    stop = TRUE
+    formula2 = paste("quality ~", pairs[i])
+    print(summary(glm(formula2, data = updated_Dataset)))
+    break
+  }
+  if (stop){break}
+}
+
+
+```
+
+**INTERPRETATION**
+
+By inspection, we can conclude that the our current best fitted model consists of the following variables in the specified order:
+
+1.  Alcohol (vol.%)
+2.  Volatile acidity (g(acetic acid)/dm^3^)
+3.  Residual sugar (g/dm^3^)
+4.  Free sulfur dioxide (mg/dm^3^)
+5.  pH level
+6.  Density (g/cm^3^)
+7.  Sulphates (g(potassium sulphate)/dm^3^)
+8.  Fixed acidity (g(tartaric acid)/dm^3^)
+9.  Chlorides (g(sodium chloride)/dm^3^)
+
+For further investigation and verification, we will also see how the other values (AIC, BIC, R-squared, Residual standard error) change as each new variable is fitted, if it is consistent with our findings, we should observe a trend where each of the values become more ideal with every variable included at each step.
+
+```{r, results = "hold"}
+
+# fitting each of the models as best_model_x
+
+# Create an empty list to store the models
+
+best_models <- list()
+
+# Loop through each element in pairs
+
+for (i in 1:9) {
+formula <- as.formula(paste("quality ~", pairs[i]))
+best_models[[i]] <- lm(formula, data = updated_Dataset)
+
+assign(paste0("best_model_", i), best_models[[i]])
+}
+
+```
+
+```{r, results = "hold"}
+
+# finding the relevant values for each of the models
+
+model_names <- paste0("best_model_", 1:9)
+
+# Loop through each model
+
+for (i in 1:9) {
+model <- get(model_names[i])
+
+assign(paste0("Residual_standard_error_", model_names[i]), summary(model)$sigma)
+assign(paste0("R_squared_", model_names[i]), summary(model)$r.squared)
+assign(paste0(model_names[i], "_AIC"), AIC(model))
+assign(paste0(model_names[i], "_BIC"), BIC(model))}
+
+table_5 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error"))
+
+# Loop through each model to extract metrics and store them in the data frame
+
+for (i in 1:9) {
+model <- get(model_names[i])
+  
+aic_value <- AIC(model)
+bic_value <- BIC(model)
+r_squared_value <- summary(model)$r.squared
+residual_standard_error <- summary(model)$sigma
+
+table_5[paste0("best_model_", i)] <- c(aic_value, bic_value, r_squared_value, residual_standard_error)}
+
+# formatting the table
+
+for (i in 1:9) {
+  column_name <- paste0("best_model_", i)
+  table_5[[column_name]] <- format(table_5[[column_name]], digits = 5)}
+
+# displaying the table
+
+table_5
+
+```
+
+**INTERPRETATION**
+
+We can observe that for every new variable added, the metric values become more ideal for every model until best_model_9. As a safety measure to indicate that we shouldn't add the remaining variables, we can also investigate how the metric values change if we add citric acid or total sulfur dioxide to the current model
+
+```{r, results = "hold"}
+
+# fitting model including citric acid
+
+model_10_citric_acid<-lm(quality~alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides + citric.acid,data=updated_Dataset)
+
+Residual_standard_error_model_10_citric_acid<-summary(model_10_citric_acid)$sigma
+R_squared_model_10_citric_acid<-summary(model_10_citric_acid)$r.squared
+model_10_citric_acid_AIC<-AIC(model_10_citric_acid)
+model_10_citric_acid_BIC<-BIC(model_10_citric_acid)
+
+# fitting model including total_sulfur_dioxide
+
+model_10_total_sulfur_dioxide<-lm(quality~alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + density + sulphates + fixed.acidity + chlorides + total.sulfur.dioxide,data=updated_Dataset)
+
+Residual_standard_error_model_10_total_sulfur_dioxide<-summary(model_10_total_sulfur_dioxide)$sigma
+R_squared_model_10_total_sulfur_dioxide<-summary(model_10_total_sulfur_dioxide)$r.squared
+model_10_total_sulfur_dioxide_AIC<-AIC(model_10_total_sulfur_dioxide)
+model_10_total_sulfur_dioxide_BIC<-BIC(model_10_total_sulfur_dioxide)
+
+# construct comparison table
+
+table_6 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error"),
+  best_model_9 = c(best_model_9_AIC, best_model_9_BIC, R_squared_best_model_9, Residual_standard_error_best_model_9),
+  model_10_citric_acid = c(model_10_citric_acid_AIC, model_10_citric_acid_BIC, R_squared_model_10_citric_acid, Residual_standard_error_model_10_citric_acid),
+  model_10_total_sulfur_dioxide = c(model_10_total_sulfur_dioxide_AIC, model_10_total_sulfur_dioxide_BIC, R_squared_model_10_total_sulfur_dioxide, Residual_standard_error_model_10_total_sulfur_dioxide)
+  )
+
+# formatting table
+
+table_6$best_model_9 <- format(table_6$best_model_9, digits = 5)
+table_6$model_10_citric_acid <- format(table_6$model_10_citric_acid, digits = 5)
+table_6$model_10_total_sulfur_dioxide <- format(table_6$model_10_total_sulfur_dioxide, digits = 5)
+
+# display table
+
+table_6
+
+```
+
+**INTERPRETATION**
+
+By inspection between the model with 9 variables in comparison to the models with 10 variables, the model with 9 predictors is preferable over the models with 10 predictors despite the latter models having a slightly higher R-squared value. The model with 9 predictors exhibits lower AIC and BIC values, indicating better model performance and a more parsimonious fit. Additionally, the residual standard error is lower in the model with 9 predictors, suggesting better precision in its predictions. Moreover, it is crucial to note that the additional variable in the 10-predictor model is not statistically significant, further reinforcing that the 9-predictor model is more reliable and efficient.
+
+<br>
+
+**CHECKING MALLOWS** **Cp**
+
+```{r, results = "hold"}
+
+# checking Mallows Cp for the current best model fitted
+
+ols_best_model_9<-ols_mallows_cp(best_model_9,updated_full_model)
+ols_best_model_9
+
+```
+
+**INTERPRETATION**
+
+Under the model, we can observe that the Mallows $Cp$ value of 9.18884 is relatively close to $k+1=p=10$ which is the ideal value; indicating that the model is neither underfitting nor overfitting.
+
+<br>
+
+**REINVESTIGATING MULTICOLLINEARITY PROPERTIES**
+
+Despite all the metrics pointing towards the conclusion that we have fitted the best model, it is also essential to consider multicollinearity in addition to traditional model evaluation metrics such as R-squared, AIC, BIC, and residual standard error. Hence we need to evaluate the presence of multicollinear issues for each model starting from the model including two regressor variables and so forth. Again, we will make use of the VIF values to investigate multicollinearity.
+
+```{r, results = "hold"}
+
+# seeing vif for each model
+
+vif(best_model_2)
+vif(best_model_3)
+vif(best_model_4)
+vif(best_model_5)
+vif(best_model_6)
+
+
+```
+
+**INTERPRETATION**
+
+We have observed that each model starting from 2 predictor variables to 5 predictor variables have VIF values $< 5$ which shows no potential multicollinearity problems. However, it is only when the 6th predictor, density, was added where we observe that there exists VIF values that exceed 5, specifically
+
+-   Density : 14.526068
+
+-   Residual Sugar : 6.729140
+
+This observation is consistent with when we investigated multicollinearity for the updated full model where density had a high correlation value with both alcohol alongside residual sugar. It is with reasonable assumption that density is the root predictor in which is resulting in the presence of multicollinear issues and thus, provides justification into removing this variable from our current best model.
+
+<br>
+
+**FITTING "BEST" MODEL WITHOUT DENSITY VARIABLE**
+
+Now, we will observe how the different metrics have changed after removing the density predictor variable.
+
+```{r, results = "hold"}
+
+# fitting best model without density
+
+updated_model<-lm(quality~ alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH + sulphates + fixed.acidity + chlorides, data=updated_Dataset)
+summary(updated_model)
+
+```
+
+```{r, results = "hold"}
+
+# recheck multicollinearity
+
+vif_updated_model<-vif(updated_model)
+vif_updated_model
+
+```
+
+**INTERPRETATION**
+
+After removing the density variable, it aligns with our assumption where the model should no longer have any indication of multicollinearity issues as evidenced with all the VIF values being below the threshold of 5 and the maximum value being only 1.689441 in respect to the alcohol variable. However, we should reinvestigate how this removal has affected the other metrics which can help in determining the overall quality of the model.
+
+```{r, results = "hold"}
+
+# comparing the updated model to the initial best model
+
+summary(updated_model)
+
+Residual_standard_error_updated_model<-summary(updated_model)$sigma
+R_squared_updated_model<-summary(updated_model)$r.squared
+updated_model_AIC<-AIC(updated_model)
+updated_model_BIC<-BIC(updated_model)
+ols_updated_model<-ols_mallows_cp(updated_model,updated_full_model)
+
+# constructing the table
+
+table_7 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error", "Mallows Cp"),
+  initial_best_model = c(best_model_9_AIC, best_model_9_BIC, R_squared_best_model_9, Residual_standard_error_best_model_9,ols_best_model_9),
+ updated_best_model = c(updated_model_AIC, updated_model_BIC, R_squared_updated_model, Residual_standard_error_updated_model,ols_updated_model))
+
+# formatting the table
+
+table_7$initial_best_model <- format(table_7$initial_best_model, digits = 5)
+table_7$updated_best_model <- format(table_7$updated_best_model, digits = 5)
+
+# displaying the table
+
+table_7
+
+```
+
+**INTERPRETATION**
+
+From our analysis, we observe that the removal of the density variable has actually led to these metric values exhibiting less ideal values instead. In particular, we can observe that the Mallows $Cp$ is much higher than the number of predictors in the model which indicates that under this new model, it displays biasness and does not fit the data well. In such cases, the benefits of improved predictive accuracy and better model performance may outweigh the drawbacks of multicollinearity. Hence, while multicollinearity can complicate the interpretation of individual coefficients, the overall enhancement in model quality justifies retaining the collinear variable
+
+<br>
+
+**INVESTIGATING PROBLEMATIC DATA POINTS**
+
+To further improve the model we should reinvestigate problematic points under the best model. It is important to note that even after removing some influential points during the initial fitting of the updated full model, it is possible to encounter new influential points under the subsequent models as we fit different models with varying numbers and combinations of predictors. Each model may highlight different data points as problematic, necessitating a thorough review and adjustment to ensure the final model's robustness and accuracy.
+
+```{r, results = "hold"}
+
+# studentized residuals 
+
+studentized_residuals_best_model_9<-studres(best_model_9)
+
+# cooks distance 
+
+cd_best_model_9<-cooks.distance(best_model_9)
+
+# leverage
+
+hat_values_best_model_9<-hatvalues(best_model_9)
+
+# plot for visualization
+
+par(mfrow=c(1,3))
+
+plot(studentized_residuals_best_model_9, main="Studentized residuals visualization", ylab="Studentized Residuals",xlab="Observation point")
+abline(h=3,col="red")
+abline(h=-3,col="red")
+
+plot(cd_best_model_9, main="Cook's distance visualization", ylab="cooks distance",xlab="Observation point")
+abline(h = 4/(nrow(updated_Dataset)), col = "red")
+
+plot(hat_values_best_model_9, main="Leverage visualization",ylab="leverage", xlab="Observation point")
+abline(h= 2 * (length(best_model_9$coefficients)) / nrow(updated_Dataset),col ="red")
+
+
+
+```
+
+```{r, results = "hold"}
+
+high_studentized_residual_points_2<-which(studentized_residuals_best_model_9>(abs(3)))
+high_leverage_points_2<-which(hat_values_best_model_9>(2*(length(best_model_9$coefficients))/nrow(updated_Dataset)))
+high_cooks_distance_points_2<-which(cd_best_model_9>(4/nrow(updated_Dataset)))
+
+all_potential_issues_2<-unique(c(high_studentized_residual_points_2,high_leverage_points_2,high_cooks_distance_points_2))
+
+# create finalized dataset 
+
+finalized_Dataset<-updated_Dataset[-all_potential_issues_2, ]
+
+# fitting finalized best model
+
+finalized_best_model<-lm(quality~alcohol + volatile.acidity + residual.sugar + free.sulfur.dioxide + pH +  sulphates + density + fixed.acidity + chlorides,data=finalized_Dataset)
+finalized_full_model<-lm(quality~.,data=finalized_Dataset)
+
+str(finalized_Dataset)
+summary(finalized_best_model)
+
+
+```
+
+```{r, results = "hold"}
+
+# comparing initial best model with finalized model
+
+Residual_standard_error_finalized_best_model<-summary(finalized_best_model)$sigma
+R_squared_finalized_best_model<-summary(finalized_best_model)$r.squared
+finalized_best_model_AIC<-AIC(finalized_best_model)
+finalized_best_model_BIC<-BIC(finalized_best_model)
+ols_finalized_best_model<-ols_mallows_cp(finalized_best_model,finalized_full_model)
+
+# constructing the table
+
+table_8 <- data.frame(
+  Metrics = c("AIC", "BIC", "R-squared", "Residual standard error", "Mallows Cp"),
+  initial_best_model = c(best_model_9_AIC, best_model_9_BIC, R_squared_best_model_9, Residual_standard_error_best_model_9,ols_best_model_9),
+  
+ finalized_best_model = c(finalized_best_model_AIC, finalized_best_model_BIC, R_squared_finalized_best_model, Residual_standard_error_finalized_best_model,ols_finalized_best_model))
+
+# formatting the table
+
+table_8$initial_best_model <- format(table_8$initial_best_model, digits = 5)
+table_8$finalized_best_model <- format(table_8$finalized_best_model, digits = 5)
+
+# displaying the table
+
+table_8
+
+```
+
+**INTERPRETATION**
+
+Initially, our best model had a Mallows' $Cp$ value of 9.18, which is close to the ideal value of 10. After removing the influential points and recalculating, the $Cp$​ value changed to 11.72. Although this new value is slightly farther from the ideal value of 10, it remains relatively close. Importantly, when examining other metrics, the updated model shows a clear improvement: the AIC and BIC values are lower, indicating a better balance between model fit and complexity; and additionally the R-squared value is higher alongside a smaller residual standard error value.These improvements in key performance indicators justify that the updated model, despite the slight increase in the $Cp$​ value, is overall more robust and accurate, making it the better choice.
+
+<br>
+
+#### VERIFICATION OF RESULTS
+
+Now that we have identified our best model, we can make further investigation and verification using inbuilt functions designed for model selection. Specifically, we will utilize forward stepwise selection, backward stepwise selection, all-subsets regression (also known as all possible subsets or best subsets regression) and the best subsets regression. By comparing our manually selected best model with those identified by these automated procedures, we can validate our findings and ensure that we have indeed chosen the most accurate and efficient model.
+
+```{r, results = "hold"}
+
+# fitting null model necessary for the following model selection techniques
+
+nullmodel<-lm(quality~1,data=updated_Dataset)
+summary(nullmodel)
+
+```
+
+**ALL SUBSETS REGRESSION**
+
+```{r, results = "hold"}
+
+# Using all subsets selection
+
+best_step_model<-step(nullmodel,scope=list(lower=nullmodel, upper=updated_full_model,direction = "both"))
+summary(best_step_model)
+
+```
+
+**FORWARD STEPWISE SELECTION**
+
+```{r, results = "hold"}
+
+# Using forward stepwise selction
+
+forward_model<-step(nullmodel,scope=list(lower=nullmodel,upper=updated_full_model,direction="forward"))
+summary(forward_model)
+
+```
+
+**BACKWARD STEPWISE SELECTION**
+
+```{r, results = "hold"}
+
+# Using forward stepwise selction
+
+backward_model<-step(updated_full_model,direction = "backward")
+summary(backward_model)
+```
+
+**BEST SUBSETS REGRESSION**
+
+```{r, results = "hold"}
+
+# Using Best Subsets Regression
+
+best_subsets_model<-regsubsets(quality~.,data=updated_Dataset, nbest=1,nvmax=11) 
+summary(best_subsets_model)
+plot(best_subsets_model)
+
+```
+
+**INTERPRETATION**
+
+After conducting best subsets regression and stepwise regression, we found that all results interestingly enough produced the same best model as our previously identified one. Both methods systematically evaluated different combinations of predictors and, despite their different approaches, consistently pointed to the same model as the optimal choice. This convergence of results allows for a greater confidence in the accuracy and effectiveness of our final best model.
+
+<br>
+
+**JUSTIFY THE INCLUSION OF VARIABLES**
+
+-   research articles
+
+<br>
+
+**CONCLUSION AND RECOMMENDATION**
+
+-   Provide a synthesis of the results and draw conclusions based on the findings. Provide recommendations aligned with the problem.
+-   Ask kai yuan include part with maximum and minimum range, + interpret
+
+<br>
+
+**REFERENCES**
+
+-   APA CITATION
