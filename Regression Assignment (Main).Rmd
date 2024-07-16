@@ -59,7 +59,7 @@ Import dataset into R Studio
 
 ```{r, results = "hold"}
 
-Dataset<-read.csv("winequality.white.csv", sep =";")
+Dataset<-read.csv("winequality-white.csv", sep =";")
 str(Dataset)
 
 ```
