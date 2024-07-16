@@ -3467,10 +3467,9 @@ investigate the quality of our model, we check on the Mallows <span class="math 
 <span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>ols_best_model_9</span></code></pre></div>
 <pre><code>## [1] 9.18884</code></pre>
 <p><strong>INTERPRETATION</strong></p>
-<p>Under the model, we can observe that the Mallows <span class="math inline">\(Cp\)</span> value of 9.18884 is relatively close
-to <span class="math inline">\(k+1=p=11\)</span> which is the ideal
-value; indicating that the model is neither underfitting nor
-overfitting.</p>
+<p>Under the model, we can observe that the Mallows <span class="math inline">\(Cp\)</span> value of 9.18884 which is seemingly
+lower than th ideal value of <span class="math inline">\(k+1=p=12\)</span> which indicates that the the
+current model might be underfitting the data.</p>
 <p><br></p>
 </div>
 <div id="reinvestigating-multicollinearity-properties" class="section level2">
@@ -3930,13 +3929,14 @@ Mallows Cp
 </table>
 <p><strong>INTERPRETATION</strong></p>
 <p>Initially, our best model had a Mallows’ <span class="math inline">\(Cp\)</span> value of 9.18. After removing the
-influential points and recalculating, the <span class="math inline">\(Cp\)</span>​ value changed to 11.72 which is even
-closer to the ideal value of 11. Additionally, when examining other
-metrics, the updated model shows a clear improvement: the AIC and BIC
-values are lower, indicating a better balance between model fit and
-complexity; and additionally the R-squared value is higher alongside a
-smaller residual standard error value. These improvements in key
-performance indicators justify that the updated model, is overall a
+influential points and recalculating, the <span class="math inline">\(Cp\)</span>​ value changed to 11.72 which is much
+closer to the ideal value of 12 which indicates that model adequately
+explains the variance in the response variable. Additionally, when
+examining other metrics, the updated model shows a clear improvement:
+the AIC and BIC values are lower, indicating a better balance between
+model fit and complexity; and additionally the R-squared value is higher
+alongside a smaller residual standard error value. These improvements in
+key performance indicators justify that the updated model, is overall a
 better fitted model.</p>
 <p><br></p>
 </div>

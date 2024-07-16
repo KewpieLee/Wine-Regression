@@ -700,7 +700,7 @@ ols_best_model_9
 
 **INTERPRETATION**
 
-Under the model, we can observe that the Mallows $Cp$ value of 9.18884 is relatively close to $k+1=p=11$ which is the ideal value; indicating that the model is neither underfitting nor overfitting.
+Under the model, we can observe that the Mallows $Cp$ value of 9.18884 which is seemingly lower than th ideal value of $k+1=p=12$ which indicates that the the current model might be underfitting the data.
 
 <br>
 
@@ -909,7 +909,7 @@ knitr::kable(table_7, caption = "Table 8: Comparison of Initial vs Finalized Bes
 
 **INTERPRETATION**
 
-Initially, our best model had a Mallows' $Cp$ value of 9.18. After removing the influential points and recalculating, the $Cp$​ value changed to 11.72 which is even closer to the ideal value of 11. Additionally, when examining other metrics, the updated model shows a clear improvement: the AIC and BIC values are lower, indicating a better balance between model fit and complexity; and additionally the R-squared value is higher alongside a smaller residual standard error value. These improvements in key performance indicators justify that the updated model, is overall a better fitted model.
+Initially, our best model had a Mallows' $Cp$ value of 9.18. After removing the influential points and recalculating, the $Cp$​ value changed to 11.72 which is much closer to the ideal value of 12 which indicates that model adequately explains the variance in the response variable. Additionally, when examining other metrics, the updated model shows a clear improvement: the AIC and BIC values are lower, indicating a better balance between model fit and complexity; and additionally the R-squared value is higher alongside a smaller residual standard error value. These improvements in key performance indicators justify that the updated model, is overall a better fitted model.
 
 <br>
 
