@@ -1,10 +1,12 @@
 ---
-title: "MAT3024 Regression Analysis Assignment"
-author: "Group 1"
-date: "`r Sys.Date()`"
-output: rmdformats::readthedown
+title: "Untitled"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+date: "2024-07-17"
+always_allow_html: true
 ---
-
 # Group Members
 
 Chong Kai Yuan (21081609)\
@@ -1045,7 +1047,7 @@ Exclusion of Citric acid : Not significant - Weak organic acid (Not much effect 
 
 5.  **Density**
 
--   Lower density is preferred
+-   Lower density is preffered
 -   Higher density - imbalance composition
 
 6.  **Total and Free Sulphur Dioxide**
@@ -1109,6 +1111,8 @@ By implementing the above techniques, Vinho Verde will be able to meet consumer 
 # References
 
 -   Admin. (2018, February 27). *Total Sulfur Dioxide – Why it Matters, Too!* Midwest Grape and Wine Industry Institute. <https://www.extension.iastate.edu/wine/total-sulfur-dioxide-why-it-matters-too/>
+
+-   *A Guide to Understanding Wine Density and Concentration \| All Wines of Europe*. (2023, July 17). <https://allwinesofeurope.com/a-guide-to-understanding-wine-density-and-concentration/>
 
 -   *Application Note #105 -Chloride in Wine by Titration*. (n.d.). <https://mantech-inc.com/wp-content/uploads/2014/07/105-Chloride-in-Wine-by-Titration.pdf>
 
